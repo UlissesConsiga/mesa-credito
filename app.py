@@ -245,8 +245,13 @@ def carregar_base():
     logger.info("Carregando base de dados do Google Sheets")
     dados = sheet.get_all_values()
     
-    if len(dados) <= 1:
-        return pd.DataFrame()
+    # Se não tem dados ou só tem cabeçalho, retorna DataFrame vazio com colunas corretas
+    if len(dados) == 0:
+        return pd.DataFrame(columns=["CCB", "Valor", "Parceiro", "Data da Análise", "Status Bankerize", "Status Analista", "Analista", "Anotações"])
+    
+    if len(dados) == 1:
+        # Só tem cabeçalho, retorna DataFrame vazio mas com as colunas do cabeçalho
+        return pd.DataFrame(columns=dados[0])
     
     header = dados[0]
     registros = dados[1:]
