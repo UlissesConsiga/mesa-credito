@@ -31,96 +31,350 @@ CACHE_TTL_CURTO = 180   # 3 minutos
 MAX_REQUESTS_PER_MINUTE = 30
 request_times = []
 
-if "tema" not in st.session_state:
-    st.session_state.tema = "auto"
+# Tema removido - usando design profissional fixo
 
 st.markdown("""
 <style>
-
 /* ============================= */
-/* TEMA CLARO AUTOMÁTICO */
+/* DESIGN PROFISSIONAL - CONSIGA EMPRÉSTIMOS */
+/* Cores da marca: Verde #1B5E3F | Laranja #F39C12 */
 /* ============================= */
 
-@media (prefers-color-scheme: light) {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    .stApp {
-        background-color: #f4f6f9;
-        color: #000000;
-    }
-
-    h1, h2, h3 {
-        color: #0d3b66;
-    }
-
-    label {
-        color: #1f2937 !important;
-        font-weight: 600;
-    }
-
-    .stButton>button {
-        background-color: #0d3b66;
-        color: white;
-        border-radius: 8px;
-        padding: 8px 16px;
-    }
-
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* ============================= */
+/* BACKGROUND E LAYOUT GERAL */
+/* ============================= */
+
+.stApp {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+}
+
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+}
 
 /* ============================= */
-/* TEMA ESCURO AUTOMÁTICO */
+/* TÍTULOS E TEXTOS */
 /* ============================= */
 
-@media (prefers-color-scheme: dark) {
+h1 {
+    color: #1B5E3F !important;
+    font-weight: 700 !important;
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 
-    .stApp {
-        background-color: #0e1117;
-        color: #ffffff;
-    }
+h2 {
+    color: #1B5E3F !important;
+    font-weight: 600 !important;
+    font-size: 1.8rem !important;
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+}
 
-    h1, h2, h3 {
-        color: #79c0ff;
-    }
+h3 {
+    color: #2d7a5a !important;
+    font-weight: 600 !important;
+    font-size: 1.4rem !important;
+}
 
-    label {
-        color: #f0f6fc !important;
-        font-weight: 600;
-    }
+p, label, span, div {
+    color: #2c3e50 !important;
+}
 
-    input, textarea {
-        color: #ffffff !important;
-    }
+/* ============================= */
+/* LABELS DOS INPUTS */
+/* ============================= */
 
-    .stTextInput input,
-    .stNumberInput input,
-    .stTextArea textarea {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        border: 1px solid #30363d !important;
-    }
+label {
+    color: #1B5E3F !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+}
 
-    .stSelectbox div[data-baseweb="select"] {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-    }
+/* ============================= */
+/* INPUTS E CAMPOS DE TEXTO */
+/* ============================= */
 
-    .stSelectbox div {
-        color: #ffffff !important;
-    }
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {
+    background-color: #ffffff !important;
+    border: 2px solid #e0e6ed !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+    color: #2c3e50 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+}
 
-    .stButton>button {
-        background-color: #238636;
-        color: white;
-        border-radius: 8px;
-        padding: 8px 16px;
-    }
+.stTextInput input:focus,
+.stNumberInput input:focus,
+.stTextArea textarea:focus {
+    border-color: #1B5E3F !important;
+    box-shadow: 0 0 0 3px rgba(27, 94, 63, 0.1) !important;
+    outline: none !important;
+}
 
+/* ============================= */
+/* SELECTBOX */
+/* ============================= */
+
+.stSelectbox div[data-baseweb="select"] {
+    background-color: #ffffff !important;
+    border: 2px solid #e0e6ed !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+}
+
+.stSelectbox div[data-baseweb="select"]:hover {
+    border-color: #1B5E3F !important;
+}
+
+/* ============================= */
+/* BOTÕES */
+/* ============================= */
+
+.stButton>button {
+    background: linear-gradient(135deg, #1B5E3F 0%, #2d7a5a 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 12px 32px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(27, 94, 63, 0.3) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.stButton>button:hover {
+    background: linear-gradient(135deg, #2d7a5a 0%, #1B5E3F 100%) !important;
+    box-shadow: 0 6px 20px rgba(27, 94, 63, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+.stButton>button:active {
+    transform: translateY(0px) !important;
+    box-shadow: 0 2px 8px rgba(27, 94, 63, 0.3) !important;
+}
+
+/* Botão primário (destaque laranja) */
+.stButton>button[kind="primary"] {
+    background: linear-gradient(135deg, #F39C12 0%, #e67e22 100%) !important;
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3) !important;
+}
+
+.stButton>button[kind="primary"]:hover {
+    background: linear-gradient(135deg, #e67e22 0%, #F39C12 100%) !important;
+    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4) !important;
+}
+
+/* ============================= */
+/* SIDEBAR */
+/* ============================= */
+
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #1B5E3F 0%, #2d7a5a 100%) !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1) !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #ffffff !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+    background-color: rgba(255,255,255,0.15) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+[data-testid="stSidebar"] .stButton>button {
+    background: rgba(255,255,255,0.2) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    color: white !important;
+}
+
+[data-testid="stSidebar"] .stButton>button:hover {
+    background: rgba(255,255,255,0.3) !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
+}
+
+/* ============================= */
+/* CARDS E CONTAINERS */
+/* ============================= */
+
+[data-testid="stMetricValue"] {
+    color: #1B5E3F !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #5a6c7d !important;
+    font-weight: 600 !important;
+}
+
+/* ============================= */
+/* DATAFRAMES */
+/* ============================= */
+
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+}
+
+[data-testid="stDataFrame"] table {
+    background-color: #ffffff !important;
+}
+
+[data-testid="stDataFrame"] thead tr th {
+    background: linear-gradient(135deg, #1B5E3F 0%, #2d7a5a 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 14px !important;
+    border: none !important;
+}
+
+[data-testid="stDataFrame"] tbody tr:nth-child(even) {
+    background-color: #f8fafb !important;
+}
+
+[data-testid="stDataFrame"] tbody tr:hover {
+    background-color: #e8f5e9 !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* ============================= */
+/* MENSAGENS DE ALERTA */
+/* ============================= */
+
+.stSuccess {
+    background-color: #d4edda !important;
+    border-left: 4px solid #28a745 !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    color: #155724 !important;
+}
+
+.stError {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545 !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    color: #721c24 !important;
+}
+
+.stWarning {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    color: #856404 !important;
+}
+
+.stInfo {
+    background-color: #d1ecf1 !important;
+    border-left: 4px solid #17a2b8 !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    color: #0c5460 !important;
+}
+
+/* ============================= */
+/* DIVISORES */
+/* ============================= */
+
+hr {
+    border: none !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, #1B5E3F, transparent) !important;
+    margin: 2rem 0 !important;
+}
+
+/* ============================= */
+/* RADIO BUTTONS */
+/* ============================= */
+
+.stRadio > label {
+    color: #1B5E3F !important;
+    font-weight: 600 !important;
+}
+
+/* ============================= */
+/* SPINNER DE CARREGAMENTO */
+/* ============================= */
+
+.stSpinner > div {
+    border-top-color: #1B5E3F !important;
+}
+
+/* ============================= */
+/* ANIMAÇÕES */
+/* ============================= */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.element-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ============================= */
+/* LOGIN CONTAINER */
+/* ============================= */
+
+.login-container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin-top: 5vh;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo img {
+    max-width: 280px;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+.login-title {
+    text-align: center;
+    color: #1B5E3F !important;
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.login-subtitle {
+    text-align: center;
+    color: #5a6c7d !important;
+    font-size: 1rem !important;
+    margin-bottom: 2rem !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-st.write("SISTEMA DE CONTROLE DE ANÁLISE DE CRÉDITO ECONSIGNADO")
+# Header removido - design profissional aplicado
 
 # ==============================
 # FUNÇÕES DE UTILIDADE
@@ -388,26 +642,51 @@ def excluir_usuario(usuario):
 # ==============================
 
 def login():
-    st.title("🔐 Login - Mesa de Crédito")
+    # Container centralizado para login
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    user = st.text_input("Usuário")
-    password = st.text_input("Senha", type="password")
-    
-    if st.button("Entrar"):
-        try:
-            usuarios = carregar_usuarios()
-            
-            if user in usuarios and verificar_senha(password, usuarios[user]["senha"]):
-                st.session_state["user"] = user
-                st.session_state["perfil"] = usuarios[user]["perfil"]
-                logger.info(f"Login bem-sucedido: {user}")
-                st.rerun()
-            else:
-                st.error("Usuário ou senha inválidos")
-                logger.warning(f"Tentativa de login falhou para usuário: {user}")
-        except Exception as e:
-            st.error("⚠️ Erro ao fazer login. Tente novamente.")
-            logger.error(f"Erro no login: {e}")
+    with col2:
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        
+        # Logo da empresa
+        st.markdown("""
+        <div class="login-logo">
+            <svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
+                <rect width="280" height="80" rx="12" fill="#1B5E3F"/>
+                <text x="140" y="35" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="white" text-anchor="middle">CONSIGA</text>
+                <text x="140" y="58" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" fill="#F39C12" text-anchor="middle">EMPRÉSTIMOS</text>
+            </svg>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Título e subtítulo
+        st.markdown('<h2 class="login-title">Bem-vindo!</h2>', unsafe_allow_html=True)
+        st.markdown('<p class="login-subtitle">Sistema de Controle de Análise de Crédito</p>', unsafe_allow_html=True)
+        
+        # Campos de login
+        user = st.text_input("👤 Usuário", placeholder="Digite seu usuário")
+        password = st.text_input("🔒 Senha", type="password", placeholder="Digite sua senha")
+        
+        # Botão de login
+        if st.button("🔐 ENTRAR", use_container_width=True):
+            try:
+                usuarios = carregar_usuarios()
+                
+                if user in usuarios and verificar_senha(password, usuarios[user]["senha"]):
+                    st.session_state["user"] = user
+                    st.session_state["perfil"] = usuarios[user]["perfil"]
+                    logger.info(f"Login bem-sucedido: {user}")
+                    st.success("✅ Login realizado com sucesso!")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("❌ Usuário ou senha inválidos")
+                    logger.warning(f"Tentativa de login falhou para usuário: {user}")
+            except Exception as e:
+                st.error("⚠️ Erro ao fazer login. Tente novamente.")
+                logger.error(f"Erro no login: {e}")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if "user" not in st.session_state:
     login()
@@ -434,16 +713,6 @@ st.sidebar.write(f"🔑 Perfil: **{st.session_state['perfil']}**")
 if st.sidebar.button("🔄 Atualizar Dados"):
     carregar_base.clear()
     st.rerun()
-
-# BOTÃO DE TROCA DE TEMA
-if st.session_state.tema == "claro":
-    if st.sidebar.button("🌙 Modo Escuro"):
-        st.session_state.tema = "escuro"
-        st.rerun()
-else:
-    if st.sidebar.button("☀️ Modo Claro"):
-        st.session_state.tema = "claro"
-        st.rerun()
 
 # ==============================
 # 📋 OPERAÇÃO
