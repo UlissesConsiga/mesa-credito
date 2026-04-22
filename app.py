@@ -35,340 +35,456 @@ request_times = []
 
 st.markdown("""
 <style>
-/* ============================= */
-/* DESIGN PROFISSIONAL - CONSIGA EMPRÉSTIMOS */
-/* Cores da marca: Verde #1B5E3F | Laranja #F39C12 */
-/* ============================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root {
+    --primary-green: #22c55e;
+    --primary-green-dark: #16a34a;
+    --primary-green-darker: #15803d;
+    --accent-orange: #f97316;
+    --accent-orange-dark: #ea580c;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
 
 * {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 /* ============================= */
-/* BACKGROUND E LAYOUT GERAL */
+/* TEMA CLARO */
 /* ============================= */
-
-.stApp {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+@media (prefers-color-scheme: light) {
+    .stApp {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdfa 100%) !important;
+    }
+    
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdfa 100%) !important;
+    }
+    
+    h1, h2, h3 {
+        color: var(--primary-green-darker) !important;
+    }
+    
+    p, span, div, label {
+        color: var(--text-primary) !important;
+    }
+    
+    .stTextInput input,
+    .stNumberInput input,
+    .stTextArea textarea {
+        background-color: var(--bg-primary) !important;
+        border: 2px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stTextArea textarea:focus {
+        border-color: var(--primary-green) !important;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+    }
+    
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: var(--bg-primary) !important;
+        border: 2px solid var(--border-color) !important;
+    }
+    
+    [data-testid="stDataFrame"] table {
+        background-color: var(--bg-primary) !important;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:nth-child(even) {
+        background-color: var(--bg-secondary) !important;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:hover {
+        background-color: #dcfce7 !important;
+    }
 }
 
-[data-testid="stAppViewContainer"] {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+/* ============================= */
+/* TEMA ESCURO */
+/* ============================= */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-green: #22c55e;
+        --primary-green-dark: #16a34a;
+        --primary-green-darker: #15803d;
+        --accent-orange: #fb923c;
+        --accent-orange-dark: #f97316;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --bg-primary: #1e293b;
+        --bg-secondary: #0f172a;
+        --border-color: #334155;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    }
+    
+    .stApp {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+    }
+    
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+    }
+    
+    h1, h2, h3 {
+        color: var(--primary-green) !important;
+    }
+    
+    p, span, div, label {
+        color: var(--text-primary) !important;
+    }
+    
+    .stTextInput input,
+    .stNumberInput input,
+    .stTextArea textarea {
+        background-color: var(--bg-primary) !important;
+        border: 2px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stTextArea textarea:focus {
+        border-color: var(--primary-green) !important;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+    }
+    
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: var(--bg-primary) !important;
+        border: 2px solid var(--border-color) !important;
+    }
+    
+    [data-testid="stDataFrame"] table {
+        background-color: var(--bg-primary) !important;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:nth-child(even) {
+        background-color: var(--bg-secondary) !important;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:hover {
+        background-color: #14532d !important;
+    }
 }
 
 /* ============================= */
-/* TÍTULOS E TEXTOS */
+/* TÍTULOS */
 /* ============================= */
-
 h1 {
-    color: #1B5E3F !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     font-size: 2.5rem !important;
     margin-bottom: 1.5rem !important;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    letter-spacing: -0.025em !important;
 }
 
 h2 {
-    color: #1B5E3F !important;
-    font-weight: 600 !important;
-    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    font-size: 1.875rem !important;
     margin-top: 2rem !important;
     margin-bottom: 1rem !important;
+    letter-spacing: -0.025em !important;
 }
 
 h3 {
-    color: #2d7a5a !important;
     font-weight: 600 !important;
-    font-size: 1.4rem !important;
-}
-
-p, label, span, div {
-    color: #2c3e50 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.025em !important;
 }
 
 /* ============================= */
-/* LABELS DOS INPUTS */
+/* LABELS */
 /* ============================= */
-
 label {
-    color: #1B5E3F !important;
     font-weight: 600 !important;
-    font-size: 0.95rem !important;
+    font-size: 0.875rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
     margin-bottom: 0.5rem !important;
 }
 
 /* ============================= */
-/* INPUTS E CAMPOS DE TEXTO */
+/* INPUTS */
 /* ============================= */
-
 .stTextInput input,
 .stNumberInput input,
 .stTextArea textarea {
-    background-color: #ffffff !important;
-    border: 2px solid #e0e6ed !important;
-    border-radius: 10px !important;
-    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
     font-size: 1rem !important;
-    color: #2c3e50 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.stTextInput input:focus,
-.stNumberInput input:focus,
-.stTextArea textarea:focus {
-    border-color: #1B5E3F !important;
-    box-shadow: 0 0 0 3px rgba(27, 94, 63, 0.1) !important;
-    outline: none !important;
+.stTextInput input::placeholder,
+.stNumberInput input::placeholder,
+.stTextArea textarea::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.6 !important;
 }
 
 /* ============================= */
 /* SELECTBOX */
 /* ============================= */
-
 .stSelectbox div[data-baseweb="select"] {
-    background-color: #ffffff !important;
-    border: 2px solid #e0e6ed !important;
-    border-radius: 10px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+    border-radius: 12px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .stSelectbox div[data-baseweb="select"]:hover {
-    border-color: #1B5E3F !important;
+    border-color: var(--primary-green) !important;
 }
 
 /* ============================= */
 /* BOTÕES */
 /* ============================= */
-
 .stButton>button {
-    background: linear-gradient(135deg, #1B5E3F 0%, #2d7a5a 100%) !important;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%) !important;
     color: white !important;
     border: none !important;
-    border-radius: 10px !important;
-    padding: 12px 32px !important;
-    font-size: 1rem !important;
+    border-radius: 12px !important;
+    padding: 14px 28px !important;
+    font-size: 0.9375rem !important;
     font-weight: 600 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 12px rgba(27, 94, 63, 0.3) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0.025em !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: var(--shadow-md) !important;
 }
 
 .stButton>button:hover {
-    background: linear-gradient(135deg, #2d7a5a 0%, #1B5E3F 100%) !important;
-    box-shadow: 0 6px 20px rgba(27, 94, 63, 0.4) !important;
-    transform: translateY(-2px) !important;
+    background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green-darker) 100%) !important;
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-1px) !important;
 }
 
 .stButton>button:active {
-    transform: translateY(0px) !important;
-    box-shadow: 0 2px 8px rgba(27, 94, 63, 0.3) !important;
+    transform: translateY(0) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
-/* Botão primário (destaque laranja) */
 .stButton>button[kind="primary"] {
-    background: linear-gradient(135deg, #F39C12 0%, #e67e22 100%) !important;
-    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3) !important;
+    background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-dark) 100%) !important;
 }
 
 .stButton>button[kind="primary"]:hover {
-    background: linear-gradient(135deg, #e67e22 0%, #F39C12 100%) !important;
-    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4) !important;
+    background: linear-gradient(135deg, var(--accent-orange-dark) 0%, #c2410c 100%) !important;
 }
 
 /* ============================= */
 /* SIDEBAR */
 /* ============================= */
-
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #1B5E3F 0%, #2d7a5a 100%) !important;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.1) !important;
+    background: linear-gradient(180deg, var(--primary-green-darker) 0%, var(--primary-green-dark) 100%) !important;
+    box-shadow: var(--shadow-xl) !important;
 }
 
 [data-testid="stSidebar"] * {
     color: #ffffff !important;
 }
 
+[data-testid="stSidebar"] label {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
 [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-    background-color: rgba(255,255,255,0.15) !important;
-    border: 1px solid rgba(255,255,255,0.3) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
 }
 
 [data-testid="stSidebar"] .stButton>button {
-    background: rgba(255,255,255,0.2) !important;
-    border: 1px solid rgba(255,255,255,0.3) !important;
-    color: white !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
 }
 
 [data-testid="stSidebar"] .stButton>button:hover {
-    background: rgba(255,255,255,0.3) !important;
-    border: 1px solid rgba(255,255,255,0.5) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 /* ============================= */
-/* CARDS E CONTAINERS */
+/* MÉTRICAS */
 /* ============================= */
-
 [data-testid="stMetricValue"] {
-    color: #1B5E3F !important;
-    font-size: 2rem !important;
-    font-weight: 700 !important;
+    color: var(--primary-green) !important;
+    font-size: 2.25rem !important;
+    font-weight: 800 !important;
 }
 
 [data-testid="stMetricLabel"] {
-    color: #5a6c7d !important;
+    color: var(--text-secondary) !important;
     font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.75rem !important;
 }
 
 /* ============================= */
 /* DATAFRAMES */
 /* ============================= */
-
 [data-testid="stDataFrame"] {
-    border-radius: 12px !important;
+    border-radius: 16px !important;
     overflow: hidden !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
-}
-
-[data-testid="stDataFrame"] table {
-    background-color: #ffffff !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 [data-testid="stDataFrame"] thead tr th {
-    background: linear-gradient(135deg, #1B5E3F 0%, #2d7a5a 100%) !important;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%) !important;
     color: white !important;
-    font-weight: 600 !important;
-    padding: 14px !important;
+    font-weight: 700 !important;
+    padding: 16px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.75rem !important;
     border: none !important;
 }
 
-[data-testid="stDataFrame"] tbody tr:nth-child(even) {
-    background-color: #f8fafb !important;
-}
-
-[data-testid="stDataFrame"] tbody tr:hover {
-    background-color: #e8f5e9 !important;
-    transition: background-color 0.2s ease !important;
+[data-testid="stDataFrame"] tbody td {
+    padding: 14px 16px !important;
+    font-weight: 500 !important;
 }
 
 /* ============================= */
-/* MENSAGENS DE ALERTA */
+/* ALERTAS */
 /* ============================= */
-
 .stSuccess {
-    background-color: #d4edda !important;
-    border-left: 4px solid #28a745 !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    color: #155724 !important;
+    background-color: #dcfce7 !important;
+    border-left: 5px solid #22c55e !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    color: #14532d !important;
+    font-weight: 500 !important;
 }
 
 .stError {
-    background-color: #f8d7da !important;
-    border-left: 4px solid #dc3545 !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    color: #721c24 !important;
+    background-color: #fee2e2 !important;
+    border-left: 5px solid #ef4444 !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    color: #7f1d1d !important;
+    font-weight: 500 !important;
 }
 
 .stWarning {
-    background-color: #fff3cd !important;
-    border-left: 4px solid #ffc107 !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    color: #856404 !important;
+    background-color: #fef3c7 !important;
+    border-left: 5px solid #f59e0b !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    color: #78350f !important;
+    font-weight: 500 !important;
 }
 
 .stInfo {
-    background-color: #d1ecf1 !important;
-    border-left: 4px solid #17a2b8 !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    color: #0c5460 !important;
+    background-color: #dbeafe !important;
+    border-left: 5px solid #3b82f6 !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    color: #1e3a8a !important;
+    font-weight: 500 !important;
 }
 
 /* ============================= */
 /* DIVISORES */
 /* ============================= */
-
 hr {
     border: none !important;
-    height: 2px !important;
-    background: linear-gradient(90deg, transparent, #1B5E3F, transparent) !important;
-    margin: 2rem 0 !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent) !important;
+    margin: 2.5rem 0 !important;
 }
 
 /* ============================= */
 /* RADIO BUTTONS */
 /* ============================= */
-
 .stRadio > label {
-    color: #1B5E3F !important;
     font-weight: 600 !important;
 }
 
 /* ============================= */
-/* SPINNER DE CARREGAMENTO */
+/* SPINNER */
 /* ============================= */
-
 .stSpinner > div {
-    border-top-color: #1B5E3F !important;
+    border-top-color: var(--primary-green) !important;
 }
 
 /* ============================= */
-/* ANIMAÇÕES */
+/* LOGIN */
 /* ============================= */
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
 }
 
-.element-container {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* ============================= */
-/* LOGIN CONTAINER */
-/* ============================= */
-
-.login-container {
-    max-width: 450px;
-    margin: 0 auto;
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-primary);
+    border-radius: 24px;
     padding: 3rem 2.5rem;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    margin-top: 5vh;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-color);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
 }
 
 .login-logo {
-    text-align: center;
-    margin-bottom: 2rem;
+    display: inline-block;
+    padding: 1.25rem 2.5rem;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-lg);
 }
 
-.login-logo img {
-    max-width: 280px;
-    height: auto;
-    margin-bottom: 1.5rem;
+.login-logo-text {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.05em;
+    margin: 0;
+    line-height: 1;
+}
+
+.login-logo-subtitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-orange);
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
 }
 
 .login-title {
-    text-align: center;
-    color: #1B5E3F !important;
-    font-size: 1.8rem !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.5rem !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
 }
 
 .login-subtitle {
-    text-align: center;
-    color: #5a6c7d !important;
-    font-size: 1rem !important;
-    margin-bottom: 2rem !important;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 </style>
@@ -410,7 +526,7 @@ def retry_on_failure(max_retries=3, delay=2):
                     if attempt < max_retries - 1:
                         time.sleep(delay * (attempt + 1))  # Backoff exponencial
                     else:
-                        st.error("⚠️ Erro ao conectar com Google Sheets. Tente novamente em alguns segundos.")
+                        st.error("⚠ Erro ao conectar com Google Sheets. Tente novamente em alguns segundos.")
                         raise
                 except Exception as e:
                     logger.error(f"Erro inesperado: {e}")
@@ -444,7 +560,7 @@ google_creds_str = os.environ.get("GOOGLE_CREDENTIALS", "{}")
 try:
     google_creds = json.loads(google_creds_str)
 except json.JSONDecodeError:
-    st.error("⚠️ Erro ao carregar credenciais do Google. Verifique a variável GOOGLE_CREDENTIALS.")
+    st.error("⚠ Erro ao carregar credenciais do Google. Verifique a variável GOOGLE_CREDENTIALS.")
     st.stop()
 
 scope = [
@@ -465,7 +581,7 @@ def conectar_google():
         return sheet, sheet_usuarios
     except Exception as e:
         logger.error(f"Erro ao conectar com Google Sheets: {e}")
-        st.error("⚠️ Erro ao conectar com Google Sheets. Verifique as credenciais e nome da planilha.")
+        st.error("⚠ Erro ao conectar com Google Sheets. Verifique as credenciais e nome da planilha.")
         st.stop()
 
 sheet, sheet_usuarios = conectar_google()
@@ -542,7 +658,7 @@ def assumir_ccb(ccb, valor, parceiro, analista, status_bankerize):
         status = registro.iloc[0]["Status Analista"]
         
         if status in ["Análise Aprovada", "Análise Reprovada"]:
-            return "⚠️ Esta CCB já foi finalizada."
+            return "⚠ Esta CCB já foi finalizada."
         
         if status in ["Em Análise", "Análise Pendente"]:
             st.session_state["ccb_ativa"] = ccb
@@ -642,51 +758,46 @@ def excluir_usuario(usuario):
 # ==============================
 
 def login():
-    # Container centralizado para login
-    col1, col2, col3 = st.columns([1, 2, 1])
+    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
     
-    with col2:
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        
-        # Logo da empresa
-        st.markdown("""
+    # Header com logo
+    st.markdown("""
+    <div class="login-header">
         <div class="login-logo">
-            <svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="280" height="80" rx="12" fill="#1B5E3F"/>
-                <text x="140" y="35" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="white" text-anchor="middle">CONSIGA</text>
-                <text x="140" y="58" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" fill="#F39C12" text-anchor="middle">EMPRÉSTIMOS</text>
-            </svg>
+            <div class="login-logo-text">CONSIGA</div>
+            <div class="login-logo-subtitle">Empréstimos</div>
         </div>
-        """, unsafe_allow_html=True)
-        
-        # Título e subtítulo
-        st.markdown('<h2 class="login-title">Bem-vindo!</h2>', unsafe_allow_html=True)
-        st.markdown('<p class="login-subtitle">Sistema de Controle de Análise de Crédito</p>', unsafe_allow_html=True)
-        
-        # Campos de login
-        user = st.text_input("👤 Usuário", placeholder="Digite seu usuário")
-        password = st.text_input("🔒 Senha", type="password", placeholder="Digite sua senha")
-        
-        # Botão de login
-        if st.button("🔐 ENTRAR", use_container_width=True):
-            try:
-                usuarios = carregar_usuarios()
-                
-                if user in usuarios and verificar_senha(password, usuarios[user]["senha"]):
-                    st.session_state["user"] = user
-                    st.session_state["perfil"] = usuarios[user]["perfil"]
-                    logger.info(f"Login bem-sucedido: {user}")
-                    st.success("✅ Login realizado com sucesso!")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("❌ Usuário ou senha inválidos")
-                    logger.warning(f"Tentativa de login falhou para usuário: {user}")
-            except Exception as e:
-                st.error("⚠️ Erro ao fazer login. Tente novamente.")
-                logger.error(f"Erro no login: {e}")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="login-title">Bem-vindo</div>
+        <div class="login-subtitle">Sistema de Controle de Análise de Crédito</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Campos de login
+    user = st.text_input("Usuário", placeholder="Digite seu usuário", label_visibility="visible")
+    password = st.text_input("Senha", type="password", placeholder="Digite sua senha", label_visibility="visible")
+    
+    # Botão de login
+    if st.button("Entrar", use_container_width=True):
+        try:
+            usuarios = carregar_usuarios()
+            
+            if user in usuarios and verificar_senha(password, usuarios[user]["senha"]):
+                st.session_state["user"] = user
+                st.session_state["perfil"] = usuarios[user]["perfil"]
+                logger.info(f"Login bem-sucedido: {user}")
+                st.success("Login realizado com sucesso")
+                time.sleep(0.5)
+                st.rerun()
+            else:
+                st.error("Usuário ou senha inválidos")
+                logger.warning(f"Tentativa de login falhou para usuário: {user}")
+        except Exception as e:
+            st.error("Erro ao fazer login. Tente novamente.")
+            logger.error(f"Erro no login: {e}")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 if "user" not in st.session_state:
     login()
@@ -698,29 +809,29 @@ analista = st.session_state["user"]
 # MENU LATERAL
 # ==============================
 
-opcoes_menu = ["📋 Operação", "📊 Acompanhamento"]
+opcoes_menu = ["Operação", "Acompanhamento"]
 
 if st.session_state["perfil"] == "Supervisor":
-    opcoes_menu.append("🔐 Administração")
+    opcoes_menu.append("Administração")
 
 menu = st.sidebar.selectbox("Menu", opcoes_menu)
 
 st.sidebar.markdown("---")
-st.sidebar.write(f"👤 Usuário: **{analista}**")
-st.sidebar.write(f"🔑 Perfil: **{st.session_state['perfil']}**")
+st.sidebar.write(f"Usuário: **{analista}**")
+st.sidebar.write(f"Perfil: **{st.session_state['perfil']}**")
 
 # Botão de atualização manual
-if st.sidebar.button("🔄 Atualizar Dados"):
+if st.sidebar.button("Atualizar Dados"):
     carregar_base.clear()
     st.rerun()
 
 # ==============================
-# 📋 OPERAÇÃO
+# OPERAÇÃO
 # ==============================
 
-if menu == "📋 Operação":
+if menu == "Operação":
     
-    st.title("📋 Mesa de Análise CCB")
+    st.title("Mesa de Análise CCB")
     
     ccb_input = st.text_input("Número da CCB")
     valor = st.text_input("Valor Líquido")
@@ -745,9 +856,9 @@ if menu == "📋 Operação":
         
         if info is not None:
             st.info(
-                f"📌 CCB já existente  \n"
-                f"👤 Analista: {info['Analista']}  \n"
-                f"📊 Status: {info['Status Analista']}"
+                f"CCB já existente  \n"
+                f"Analista: {info['Analista']}  \n"
+                f"Status: {info['Status Analista']}"
             )
     
     if st.button("Assumir Análise"):
@@ -761,10 +872,10 @@ if menu == "📋 Operação":
             )
             
             if resposta == "OK":
-                st.success("✅ CCB criada e assumida com sucesso!")
+                st.success("CCB criada e assumida com sucesso")
                 st.rerun()
             elif resposta == "CONTINUAR":
-                st.success("✅ Retomando análise desta CCB.")
+                st.success("Retomando análise desta CCB")
             else:
                 st.error(resposta)
     
@@ -791,18 +902,18 @@ if menu == "📋 Operação":
                     )
                     
                     if resultado_final == "Finalizado":
-                        st.success("✅ Análise finalizada com sucesso!")
+                        st.success("Análise finalizada com sucesso")
                         del st.session_state["ccb_ativa"]
                         st.rerun()
                     else:
                         st.error(resultado_final)
     
     # ==============================
-    # 📊 PAINEL GERAL
+    # PAINEL GERAL
     # ==============================
     
     st.divider()
-    st.subheader("📊 Painel Geral")
+    st.subheader("Painel Geral")
     
     df = carregar_base().copy()
     
@@ -824,12 +935,12 @@ if menu == "📋 Operação":
         st.info("Nenhum registro encontrado.")
 
 # ==============================
-# 📊 ACOMPANHAMENTO
+# ACOMPANHAMENTO
 # ==============================
 
-if menu == "📊 Acompanhamento":
+if menu == "Acompanhamento":
     
-    st.title("📊 Acompanhamento")
+    st.title("Acompanhamento")
     
     df = carregar_base().copy()
     
@@ -839,7 +950,7 @@ if menu == "📊 Acompanhamento":
         df = df.dropna(subset=["Data da Análise"])
         
         st.divider()
-        st.subheader("📈 Resumo do Mês Atual")
+        st.subheader("Resumo do Mês Atual")
         
         mes_atual = datetime.now().strftime("%m/%Y")
         df["MesAno"] = df["Data da Análise"].dt.strftime("%m/%Y")
@@ -854,10 +965,10 @@ if menu == "📊 Acompanhamento":
             
             # Métricas visuais
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("📋 Total", total)
-            col2.metric("⏳ Pendentes", pendentes)
-            col3.metric("✅ Aprovadas", aprovadas)
-            col4.metric("❌ Reprovadas", reprovadas)
+            col1.metric("Total", total)
+            col2.metric("Pendentes", pendentes)
+            col3.metric("Aprovadas", aprovadas)
+            col4.metric("Reprovadas", reprovadas)
             
             # Gráfico
             resumo_mes = pd.DataFrame({
@@ -898,7 +1009,7 @@ if menu == "📊 Acompanhamento":
             st.info("Nenhuma proposta encontrada no mês atual.")
         
         st.divider()
-        st.subheader("👤 Dashboard por Analista")
+        st.subheader("Dashboard por Analista")
         
         meses = sorted(df["MesAno"].dropna().unique(), reverse=True)
         
@@ -918,16 +1029,16 @@ if menu == "📊 Acompanhamento":
             st.dataframe(resumo, use_container_width=True, hide_index=True)
 
 # ==============================
-# 🔐 ADMINISTRAÇÃO
+# ADMINISTRAÇÃO
 # ==============================
 
-if menu == "🔐 Administração":
+if menu == "Administração":
     
     if st.session_state["perfil"] != "Supervisor":
         st.warning("Acesso restrito a Supervisores.")
         st.stop()
     
-    st.title("🔐 Administração de Usuários")
+    st.title("Administração de Usuários")
     
     usuarios = carregar_usuarios()
     
@@ -963,7 +1074,7 @@ if menu == "🔐 Administração":
         else:
             with st.spinner("Cadastrando usuário..."):
                 if adicionar_usuario(novo_usuario, nova_senha, novo_perfil):
-                    st.success("✅ Usuário cadastrado com sucesso!")
+                    st.success("Usuário cadastrado com sucesso")
                     st.rerun()
                 else:
                     st.error("Erro ao cadastrar usuário.")
@@ -984,7 +1095,7 @@ if menu == "🔐 Administração":
         else:
             with st.spinner("Excluindo usuário..."):
                 if excluir_usuario(usuario_excluir):
-                    st.success("✅ Usuário excluído com sucesso!")
+                    st.success("Usuário excluído com sucesso")
                     st.rerun()
                 else:
                     st.error("Erro ao excluir usuário.")
