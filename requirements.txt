@@ -1,0 +1,9 @@
+streamlit
+gspread
+oauth2client
+pandas
+requests
+xlsxwriter
+bcrypt
+matplotlib
+pytz
