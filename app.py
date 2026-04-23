@@ -16,7 +16,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 # ==============================
 # CONFIGURAÇÕES OTIMIZADAS
@@ -316,6 +316,13 @@ label {
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
+/* Logo na sidebar */
+[data-testid="stSidebar"] img {
+    border-radius: 10px !important;
+    padding: 0.5rem !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* ============================= */
 /* MÉTRICAS */
 /* ============================= */
@@ -424,17 +431,10 @@ hr {
 /* ============================= */
 /* LOGIN */
 /* ============================= */
-.login-wrapper {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-}
-
 .login-card {
-    width: 100%;
+    width: 90%;
     max-width: 440px;
+    margin: 0 auto;
     background: var(--bg-primary);
     border-radius: 24px;
     padding: 3rem 2.5rem;
@@ -459,7 +459,7 @@ hr {
 .login-logo-text {
     font-size: 1.75rem;
     font-weight: 800;
-    color: white;
+    color: white !important;
     letter-spacing: 0.05em;
     margin: 0;
     line-height: 1;
@@ -468,7 +468,7 @@ hr {
 .login-logo-subtitle {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--accent-orange);
+    color: var(--accent-orange) !important;
     letter-spacing: 0.1em;
     margin-top: 0.5rem;
     text-transform: uppercase;
@@ -477,14 +477,27 @@ hr {
 .login-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     margin-bottom: 0.5rem;
 }
 
 .login-subtitle {
     font-size: 0.9375rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
     font-weight: 500;
+}
+
+/* Esconder header e toolbar do Streamlit */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+button[kind="header"] {
+    display: none !important;
+}
+
+[data-testid="stToolbar"] {
+    display: none !important;
 }
 
 </style>
@@ -758,7 +771,6 @@ def excluir_usuario(usuario):
 # ==============================
 
 def login():
-    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     st.markdown('<div class="login-card">', unsafe_allow_html=True)
     
     # Header com logo
@@ -774,11 +786,11 @@ def login():
     """, unsafe_allow_html=True)
     
     # Campos de login
-    user = st.text_input("Usuário", placeholder="Digite seu usuário", label_visibility="visible")
-    password = st.text_input("Senha", type="password", placeholder="Digite sua senha", label_visibility="visible")
+    user = st.text_input("Usuário", placeholder="Digite seu usuário", key="login_user")
+    password = st.text_input("Senha", type="password", placeholder="Digite sua senha", key="login_pass")
     
     # Botão de login
-    if st.button("Entrar", use_container_width=True):
+    if st.button("Entrar", use_container_width=True, key="login_btn"):
         try:
             usuarios = carregar_usuarios()
             
@@ -797,11 +809,33 @@ def login():
             logger.error(f"Erro no login: {e}")
     
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 if "user" not in st.session_state:
+    # Adiciona CSS específico para tela de login
+    st.markdown("""
+    <style>
+    .main .block-container {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
+        padding: 2rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     login()
     st.stop()
+else:
+    # Remove CSS de centralização após login
+    st.markdown("""
+    <style>
+    .main .block-container {
+        display: block !important;
+        padding: 3rem 1rem !important;
+        max-width: 100% !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 analista = st.session_state["user"]
 
@@ -814,14 +848,28 @@ opcoes_menu = ["Operação", "Acompanhamento"]
 if st.session_state["perfil"] == "Supervisor":
     opcoes_menu.append("Administração")
 
-menu = st.sidebar.selectbox("Menu", opcoes_menu)
+# Logo na sidebar
+try:
+    st.sidebar.image("Logo Principal.png", use_container_width=True)
+except Exception:
+    st.sidebar.markdown("""
+    <div style="text-align: center; padding: 1rem;">
+        <div style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.15); border-radius: 12px;">
+            <div style="font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: 0.05em;">CONSIGA</div>
+            <div style="font-size: 0.7rem; font-weight: 600; color: #fb923c; letter-spacing: 0.1em; text-transform: uppercase;">Empréstimos</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-st.sidebar.write(f"Usuário: **{analista}**")
-st.sidebar.write(f"Perfil: **{st.session_state['perfil']}**")
+menu = st.sidebar.selectbox("", opcoes_menu)
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"**Usuário:** {analista}")
+st.sidebar.markdown(f"**Perfil:** {st.session_state['perfil']}")
+st.sidebar.markdown("")
 
 # Botão de atualização manual
-if st.sidebar.button("Atualizar Dados"):
+if st.sidebar.button("Atualizar Dados", use_container_width=True):
     carregar_base.clear()
     st.rerun()
 
