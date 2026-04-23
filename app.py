@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
     page_title="Consiga Empréstimos",
     page_icon="💼"
 )
@@ -750,42 +750,53 @@ def excluir_usuario(usuario):
 # ==============================
 
 def login():
-    # Centraliza o conteúdo verticalmente
     st.markdown("""
     <style>
+    /* Na tela de login: esconde sidebar e centraliza o card */
+    [data-testid="stSidebar"],
+    [data-testid="collapsedControl"] { display: none !important; }
+
     .main .block-container {
-        max-width: 480px !important;
-        padding-top: 8vh !important;
-        padding-bottom: 4rem !important;
+        max-width: 460px !important;
+        padding: 10vh 1rem 4rem !important;
         margin: 0 auto !important;
     }
-    [data-testid="stSidebar"] { display: none !important; }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
-
-    # Tenta carregar a logo real; se não existir, usa bloco de texto
-    import os as _os
-    if _os.path.exists("Logo Principal.png"):
-        st.markdown('<div class="login-header"><div class="login-logo-area">', unsafe_allow_html=True)
-        st.image("Logo Principal.png", width=200)
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <div class="login-header">
-            <div class="login-logo-area">
-                <div class="login-logo-text-block">
-                    <span class="login-logo-name">CONSIGA</span>
-                    <span class="login-logo-sub">Empréstimos</span>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
+    # Card completo em HTML — sem nenhum st.image para evitar elemento flutuante
     st.markdown("""
-        <p class="login-title">Bem-vindo</p>
-        <p class="login-subtitle">Sistema de Controle de Análise de Crédito</p>
+    <div style="
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2.5rem 2.5rem 2rem;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.18);
+        border: 1px solid var(--border-color);
+        text-align: center;
+        margin-bottom: 1.5rem;
+    ">
+        <img
+            src="Logo Principal.png"
+            onerror="this.style.display='none'; document.getElementById('logo-fb').style.display='inline-flex';"
+            style="max-width:200px; height:auto; border-radius:10px; margin-bottom:1.25rem; display:block; margin-left:auto; margin-right:auto;"
+        />
+        <div id="logo-fb" style="
+            display:none;
+            flex-direction:column;
+            align-items:center;
+            background:linear-gradient(135deg,#22c55e,#16a34a);
+            border-radius:14px;
+            padding:1rem 2rem;
+            margin:0 auto 1.25rem;
+            width:fit-content;
+            box-shadow:0 8px 24px rgba(34,197,94,0.3);
+        ">
+            <span style="font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:0.06em;line-height:1;">CONSIGA</span>
+            <span style="font-size:0.75rem;font-weight:600;color:#fbbf24;letter-spacing:0.12em;text-transform:uppercase;margin-top:4px;">Empréstimos</span>
         </div>
+        <p style="font-size:1.375rem;font-weight:700;margin:0 0 4px;">Bem-vindo</p>
+        <p style="font-size:0.875rem;font-weight:400;margin:0;opacity:0.7;">Sistema de Controle de Análise de Crédito</p>
+    </div>
     """, unsafe_allow_html=True)
 
     user     = st.text_input("Usuário", placeholder="Digite seu usuário",  key="login_user")
@@ -806,21 +817,21 @@ def login():
             st.error("Erro ao fazer login. Tente novamente.")
             logger.error(f"Erro no login: {e}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
 
 if "user" not in st.session_state:
     login()
     st.stop()
 
-# Restaura layout normal após login
+# Após login: restaura layout normal e garante sidebar visível
 st.markdown("""
 <style>
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"] { display: flex !important; }
+
 .main .block-container {
     max-width: 100% !important;
     padding: 2rem 2rem 4rem !important;
 }
-[data-testid="stSidebar"] { display: flex !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -835,18 +846,30 @@ opcoes_menu = ["Operação", "Acompanhamento"]
 if st.session_state["perfil"] == "Supervisor":
     opcoes_menu.append("Administração")
 
-# Logo na sidebar
-try:
-    st.sidebar.image("Logo Principal.png", use_container_width=True)
-except Exception:
-    st.sidebar.markdown("""
-    <div style="text-align: center; padding: 1rem;">
-        <div style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.15); border-radius: 12px;">
-            <div style="font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: 0.05em;">CONSIGA</div>
-            <div style="font-size: 0.7rem; font-weight: 600; color: #fb923c; letter-spacing: 0.1em; text-transform: uppercase;">Empréstimos</div>
-        </div>
+# Logo na sidebar em HTML puro (sem st.image para evitar elementos flutuantes)
+st.sidebar.markdown("""
+<div style="padding: 1.25rem 0.75rem 0.5rem; text-align: center;">
+    <img
+        src="Logo Principal.png"
+        onerror="this.style.display='none'; document.getElementById('sb-logo-fb').style.display='inline-flex';"
+        style="max-width:160px; width:100%; height:auto; border-radius:10px; background:#fff; padding:6px;"
+    />
+    <div id="sb-logo-fb" style="
+        display:none;
+        flex-direction:column;
+        align-items:center;
+        background:rgba(34,197,94,0.15);
+        border:1px solid rgba(34,197,94,0.3);
+        border-radius:12px;
+        padding:0.75rem 1.25rem;
+        margin:0 auto;
+        width:fit-content;
+    ">
+        <span style="font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:0.06em;">CONSIGA</span>
+        <span style="font-size:0.65rem;font-weight:600;color:#fb923c;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Empréstimos</span>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
 menu = st.sidebar.selectbox("", opcoes_menu)
