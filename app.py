@@ -16,7 +16,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(
+    layout="wide",
+    initial_sidebar_state="expanded",
+    page_title="Consiga Empréstimos",
+    page_icon="💼"
+)
 
 # ==============================
 # CONFIGURAÇÕES OTIMIZADAS
@@ -37,6 +42,9 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* ============================= */
+/* VARIÁVEIS GLOBAIS - TEMA CLARO (padrão) */
+/* ============================= */
 :root {
     --primary-green: #22c55e;
     --primary-green-dark: #16a34a;
@@ -48,137 +56,90 @@ st.markdown("""
     --bg-primary: #ffffff;
     --bg-secondary: #f8fafc;
     --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.15);
+    --sidebar-bg: #1a1f2e;
+    --sidebar-border: rgba(255,255,255,0.08);
 }
 
+/* ============================= */
+/* VARIÁVEIS - TEMA ESCURO */
+/* ============================= */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --bg-primary: #1e293b;
+        --bg-secondary: #0f172a;
+        --border-color: #334155;
+        --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+        --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.6);
+    }
+}
+
+/* ============================= */
+/* BASE */
+/* ============================= */
 * {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 /* ============================= */
-/* TEMA CLARO */
+/* BACKGROUND - TEMA CLARO */
 /* ============================= */
 @media (prefers-color-scheme: light) {
-    .stApp {
-        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdfa 100%) !important;
+    .stApp, [data-testid="stAppViewContainer"] {
+        background: #f0fdf4 !important;
     }
-    
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdfa 100%) !important;
-    }
-    
-    h1, h2, h3 {
-        color: var(--primary-green-darker) !important;
-    }
-    
-    p, span, div, label {
-        color: var(--text-primary) !important;
-    }
-    
-    .stTextInput input,
-    .stNumberInput input,
-    .stTextArea textarea {
-        background-color: var(--bg-primary) !important;
+    h1, h2, h3 { color: var(--primary-green-darker) !important; }
+    p, span, div, label { color: var(--text-primary) !important; }
+    .stTextInput input, .stNumberInput input, .stTextArea textarea {
+        background-color: #ffffff !important;
         border: 2px solid var(--border-color) !important;
         color: var(--text-primary) !important;
     }
-    
-    .stTextInput input:focus,
-    .stNumberInput input:focus,
-    .stTextArea textarea:focus {
+    .stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
         border-color: var(--primary-green) !important;
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.12) !important;
     }
-    
     .stSelectbox div[data-baseweb="select"] {
-        background-color: var(--bg-primary) !important;
+        background-color: #ffffff !important;
         border: 2px solid var(--border-color) !important;
     }
-    
-    [data-testid="stDataFrame"] table {
-        background-color: var(--bg-primary) !important;
-    }
-    
-    [data-testid="stDataFrame"] tbody tr:nth-child(even) {
-        background-color: var(--bg-secondary) !important;
-    }
-    
-    [data-testid="stDataFrame"] tbody tr:hover {
-        background-color: #dcfce7 !important;
-    }
+    [data-testid="stDataFrame"] table { background-color: #ffffff !important; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(even) { background-color: #f8fafc !important; }
+    [data-testid="stDataFrame"] tbody tr:hover { background-color: #dcfce7 !important; }
 }
 
 /* ============================= */
-/* TEMA ESCURO */
+/* BACKGROUND - TEMA ESCURO */
 /* ============================= */
 @media (prefers-color-scheme: dark) {
-    :root {
-        --primary-green: #22c55e;
-        --primary-green-dark: #16a34a;
-        --primary-green-darker: #15803d;
-        --accent-orange: #fb923c;
-        --accent-orange-dark: #f97316;
-        --text-primary: #f1f5f9;
-        --text-secondary: #cbd5e1;
-        --bg-primary: #1e293b;
-        --bg-secondary: #0f172a;
-        --border-color: #334155;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    .stApp, [data-testid="stAppViewContainer"] {
+        background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%) !important;
     }
-    
-    .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
-    }
-    
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
-    }
-    
-    h1, h2, h3 {
-        color: var(--primary-green) !important;
-    }
-    
-    p, span, div, label {
-        color: var(--text-primary) !important;
-    }
-    
-    .stTextInput input,
-    .stNumberInput input,
-    .stTextArea textarea {
+    h1, h2, h3 { color: var(--primary-green) !important; }
+    p, span, div, label { color: var(--text-primary) !important; }
+    .stTextInput input, .stNumberInput input, .stTextArea textarea {
         background-color: var(--bg-primary) !important;
         border: 2px solid var(--border-color) !important;
         color: var(--text-primary) !important;
     }
-    
-    .stTextInput input:focus,
-    .stNumberInput input:focus,
-    .stTextArea textarea:focus {
+    .stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
         border-color: var(--primary-green) !important;
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.2) !important;
     }
-    
     .stSelectbox div[data-baseweb="select"] {
         background-color: var(--bg-primary) !important;
         border: 2px solid var(--border-color) !important;
     }
-    
-    [data-testid="stDataFrame"] table {
-        background-color: var(--bg-primary) !important;
-    }
-    
-    [data-testid="stDataFrame"] tbody tr:nth-child(even) {
-        background-color: var(--bg-secondary) !important;
-    }
-    
-    [data-testid="stDataFrame"] tbody tr:hover {
-        background-color: #14532d !important;
-    }
+    [data-testid="stDataFrame"] table { background-color: var(--bg-primary) !important; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(even) { background-color: var(--bg-secondary) !important; }
+    [data-testid="stDataFrame"] tbody tr:hover { background-color: #14532d !important; }
 }
 
 /* ============================= */
@@ -284,43 +245,51 @@ label {
 }
 
 /* ============================= */
-/* SIDEBAR */
+/* SIDEBAR - azul-escuro neutro, logo sempre visível */
 /* ============================= */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, var(--primary-green-darker) 0%, var(--primary-green-dark) 100%) !important;
-    box-shadow: var(--shadow-xl) !important;
+    background: #1a1f2e !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.3) !important;
 }
 
 [data-testid="stSidebar"] * {
-    color: #ffffff !important;
+    color: #e2e8f0 !important;
 }
 
 [data-testid="stSidebar"] label {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: #94a3b8 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
 }
 
 [data-testid="stSidebar"] .stButton>button {
-    background: rgba(255, 255, 255, 0.15) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px) !important;
+    background: rgba(34,197,94,0.15) !important;
+    border: 1px solid rgba(34,197,94,0.3) !important;
+    color: #22c55e !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
 }
 
 [data-testid="stSidebar"] .stButton>button:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(34,197,94,0.25) !important;
+    border-color: rgba(34,197,94,0.5) !important;
 }
 
-/* Logo na sidebar */
+/* Logo na sidebar - fundo branco suave para contraste */
 [data-testid="stSidebar"] img {
-    border-radius: 10px !important;
-    padding: 0.5rem !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    padding: 8px !important;
+    display: block !important;
 }
 
 /* ============================= */
@@ -429,75 +398,85 @@ hr {
 }
 
 /* ============================= */
-/* LOGIN */
+/* LOGIN - centralizado, sem elementos flutuantes */
 /* ============================= */
+
+/* Esconde header e toolbar do Streamlit em toda a app */
+header[data-testid="stHeader"] { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }
+#MainMenu { display: none !important; }
+footer { display: none !important; }
+
+/* Card de login */
 .login-card {
-    width: 90%;
-    max-width: 440px;
+    width: 100%;
+    max-width: 420px;
     margin: 0 auto;
     background: var(--bg-primary);
-    border-radius: 24px;
-    padding: 3rem 2.5rem;
-    box-shadow: var(--shadow-xl);
+    border-radius: 20px;
+    padding: 2.5rem 2.5rem 2rem;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
     border: 1px solid var(--border-color);
 }
 
 .login-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
-.login-logo {
-    display: inline-block;
-    padding: 1.25rem 2.5rem;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    border-radius: 16px;
+/* Área da logo — fundo branco para a imagem aparecer */
+.login-logo-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-lg);
 }
 
-.login-logo-text {
+.login-logo-area img {
+    max-width: 200px;
+    height: auto;
+}
+
+/* Fallback texto quando não há imagem */
+.login-logo-text-block {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-radius: 14px;
+    padding: 1rem 2rem;
+    box-shadow: 0 8px 24px rgba(34,197,94,0.3);
+}
+
+.login-logo-name {
     font-size: 1.75rem;
     font-weight: 800;
-    color: white !important;
-    letter-spacing: 0.05em;
-    margin: 0;
+    color: #ffffff !important;
+    letter-spacing: 0.06em;
     line-height: 1;
 }
 
-.login-logo-subtitle {
-    font-size: 0.875rem;
+.login-logo-sub {
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--accent-orange) !important;
-    letter-spacing: 0.1em;
-    margin-top: 0.5rem;
+    color: #fbbf24 !important;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    margin-top: 4px;
 }
 
 .login-title {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     font-weight: 700;
     color: var(--text-primary) !important;
-    margin-bottom: 0.5rem;
+    margin: 0 0 4px;
 }
 
 .login-subtitle {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     color: var(--text-secondary) !important;
-    font-weight: 500;
-}
-
-/* Esconder header e toolbar do Streamlit */
-header[data-testid="stHeader"] {
-    display: none !important;
-}
-
-button[kind="header"] {
-    display: none !important;
-}
-
-[data-testid="stToolbar"] {
-    display: none !important;
+    font-weight: 400;
+    margin: 0;
 }
 
 </style>
@@ -771,71 +750,79 @@ def excluir_usuario(usuario):
 # ==============================
 
 def login():
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
-    
-    # Header com logo
+    # Centraliza o conteúdo verticalmente
     st.markdown("""
-    <div class="login-header">
-        <div class="login-logo">
-            <div class="login-logo-text">CONSIGA</div>
-            <div class="login-logo-subtitle">Empréstimos</div>
-        </div>
-        <div class="login-title">Bem-vindo</div>
-        <div class="login-subtitle">Sistema de Controle de Análise de Crédito</div>
-    </div>
+    <style>
+    .main .block-container {
+        max-width: 480px !important;
+        padding-top: 8vh !important;
+        padding-bottom: 4rem !important;
+        margin: 0 auto !important;
+    }
+    [data-testid="stSidebar"] { display: none !important; }
+    </style>
     """, unsafe_allow_html=True)
-    
-    # Campos de login
-    user = st.text_input("Usuário", placeholder="Digite seu usuário", key="login_user")
-    password = st.text_input("Senha", type="password", placeholder="Digite sua senha", key="login_pass")
-    
-    # Botão de login
+
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+
+    # Tenta carregar a logo real; se não existir, usa bloco de texto
+    import os as _os
+    if _os.path.exists("Logo Principal.png"):
+        st.markdown('<div class="login-header"><div class="login-logo-area">', unsafe_allow_html=True)
+        st.image("Logo Principal.png", width=200)
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="login-header">
+            <div class="login-logo-area">
+                <div class="login-logo-text-block">
+                    <span class="login-logo-name">CONSIGA</span>
+                    <span class="login-logo-sub">Empréstimos</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <p class="login-title">Bem-vindo</p>
+        <p class="login-subtitle">Sistema de Controle de Análise de Crédito</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    user     = st.text_input("Usuário", placeholder="Digite seu usuário",  key="login_user")
+    password = st.text_input("Senha",   placeholder="Digite sua senha",    key="login_pass", type="password")
+
     if st.button("Entrar", use_container_width=True, key="login_btn"):
         try:
             usuarios = carregar_usuarios()
-            
             if user in usuarios and verificar_senha(password, usuarios[user]["senha"]):
-                st.session_state["user"] = user
+                st.session_state["user"]   = user
                 st.session_state["perfil"] = usuarios[user]["perfil"]
                 logger.info(f"Login bem-sucedido: {user}")
-                st.success("Login realizado com sucesso")
-                time.sleep(0.5)
                 st.rerun()
             else:
                 st.error("Usuário ou senha inválidos")
-                logger.warning(f"Tentativa de login falhou para usuário: {user}")
+                logger.warning(f"Tentativa de login falhou: {user}")
         except Exception as e:
             st.error("Erro ao fazer login. Tente novamente.")
             logger.error(f"Erro no login: {e}")
-    
+
     st.markdown('</div>', unsafe_allow_html=True)
 
+
 if "user" not in st.session_state:
-    # Adiciona CSS específico para tela de login
-    st.markdown("""
-    <style>
-    .main .block-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-height: 100vh !important;
-        padding: 2rem !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
     login()
     st.stop()
-else:
-    # Remove CSS de centralização após login
-    st.markdown("""
-    <style>
-    .main .block-container {
-        display: block !important;
-        padding: 3rem 1rem !important;
-        max-width: 100% !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
+# Restaura layout normal após login
+st.markdown("""
+<style>
+.main .block-container {
+    max-width: 100% !important;
+    padding: 2rem 2rem 4rem !important;
+}
+[data-testid="stSidebar"] { display: flex !important; }
+</style>
+""", unsafe_allow_html=True)
 
 analista = st.session_state["user"]
 
