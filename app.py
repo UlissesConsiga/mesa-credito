@@ -612,7 +612,6 @@ def excluir_usuario(usuario):
     """Exclui usuário da planilha"""
     try:
         dados = sheet_usuarios.get_all_values()
-        
         for idx, linha in enumerate(dados[1:], start=2):
             if linha[0] == usuario:
                 sheet_usuarios.delete_rows(idx)
@@ -623,6 +622,51 @@ def excluir_usuario(usuario):
     except Exception as e:
         logger.error(f"Erro ao excluir usuário: {e}")
         return False
+
+@retry_on_failure(max_retries=3)
+def atualizar_ccb(ccb, valor, parceiro, analista, status_bankerize):
+    """Atualiza todos os dados de uma CCB existente na planilha"""
+    df = carregar_base()
+    for idx, linha in df.iterrows():
+        if str(linha["CCB"]) == str(ccb):
+            linha_real = idx + 2
+            try:
+                updates = [
+                    {'range': f'B{linha_real}', 'values': [[valor]]},
+                    {'range': f'C{linha_real}', 'values': [[parceiro]]},
+                    {'range': f'D{linha_real}', 'values': [[datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")]]},
+                    {'range': f'E{linha_real}', 'values': [[status_bankerize]]},
+                    {'range': f'F{linha_real}', 'values': [["Em Análise"]]},
+                    {'range': f'G{linha_real}', 'values': [[analista]]},
+                    {'range': f'H{linha_real}', 'values': [[""]]},
+                ]
+                sheet.batch_update(updates)
+                carregar_base.clear()
+                st.session_state["ccb_ativa"] = ccb
+                logger.info(f"CCB {ccb} atualizada por {analista}")
+                return "ATUALIZADO"
+            except Exception as e:
+                logger.error(f"Erro ao atualizar CCB: {e}")
+                return f"Erro ao atualizar: {str(e)}"
+    return "CCB não encontrada."
+
+def alterar_senha(usuario, senha_atual, nova_senha):
+    """Altera a senha de um usuário"""
+    try:
+        dados = sheet_usuarios.get_all_values()
+        for idx, linha in enumerate(dados[1:], start=2):
+            if linha[0] == usuario:
+                if not verificar_senha(senha_atual, linha[1]):
+                    return False, "Senha atual incorreta."
+                novo_hash = hash_senha(nova_senha)
+                sheet_usuarios.update_cell(idx, 2, novo_hash)
+                carregar_usuarios.clear()
+                logger.info(f"Senha alterada para usuário {usuario}")
+                return True, "Senha alterada com sucesso."
+        return False, "Usuário não encontrado."
+    except Exception as e:
+        logger.error(f"Erro ao alterar senha: {e}")
+        return False, f"Erro: {str(e)}"
 
 # ==============================
 # LOGIN
@@ -763,6 +807,31 @@ if st.sidebar.button("Atualizar Dados", use_container_width=True):
     carregar_base.clear()
     st.rerun()
 
+st.sidebar.markdown("")
+if st.sidebar.button("Sair", use_container_width=True, type="primary"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
+
+# Troca de senha própria (disponível para todos os perfis via expander na sidebar)
+with st.sidebar.expander("Alterar minha senha"):
+    s_atual  = st.text_input("Senha atual",    type="password", key="s_atual")
+    s_nova   = st.text_input("Nova senha",     type="password", key="s_nova")
+    s_nova2  = st.text_input("Confirmar nova", type="password", key="s_nova2")
+    if st.button("Salvar senha", key="btn_salvar_senha", use_container_width=True):
+        if not s_atual or not s_nova:
+            st.error("Preencha todos os campos.")
+        elif s_nova != s_nova2:
+            st.error("As senhas não coincidem.")
+        elif len(s_nova) < 4:
+            st.error("A senha deve ter ao menos 4 caracteres.")
+        else:
+            ok, msg = alterar_senha(analista, s_atual, s_nova)
+            if ok:
+                st.success(msg)
+            else:
+                st.error(msg)
+
 # ==============================
 # OPERAÇÃO
 # ==============================
@@ -786,37 +855,79 @@ if menu == "Operação":
         ],
         key="status_bankerize_select"
     )
-    
-    # Busca local (sem acessar Google Sheets novamente)
+
+    # ==============================
+    # BUSCA EM TEMPO REAL
+    # ==============================
+    info = None
     if ccb_input:
         df_cache = carregar_base()
         info = buscar_ccb_local(ccb_input, df_cache)
-        
         if info is not None:
-            st.info(
-                f"CCB já existente  \n"
-                f"Analista: {info['Analista']}  \n"
-                f"Status: {info['Status Analista']}"
-            )
-    
+            status_existente = info["Status Analista"]
+            cor = {"Análise Aprovada": "#22c55e", "Análise Reprovada": "#ef4444",
+                   "Em Análise": "#3b82f6", "Análise Pendente": "#f97316"}.get(status_existente, "#64748b")
+            st.markdown(f"""
+            <div style="border-left:4px solid {cor};background:rgba(0,0,0,0.04);
+                border-radius:8px;padding:12px 16px;margin:8px 0;">
+                <strong>CCB já cadastrada</strong><br>
+                Analista: {info['Analista']} &nbsp;|&nbsp;
+                Status: <span style="color:{cor};font-weight:600;">{status_existente}</span><br>
+                Data: {info['Data da Análise']}
+            </div>
+            """, unsafe_allow_html=True)
+
+    # ==============================
+    # BOTÃO ASSUMIR + LÓGICA DE ATUALIZAÇÃO
+    # ==============================
     if st.button("Assumir Análise"):
-        with st.spinner("Processando..."):
-            resposta = assumir_ccb(
-                ccb_input,
-                valor,
-                parceiro,
-                analista,
-                status_bankerize
-            )
-            
-            if resposta == "OK":
-                st.success("CCB criada e assumida com sucesso")
+        if not ccb_input:
+            st.error("Informe o número da CCB.")
+        elif info is not None:
+            # CCB já existe — pergunta se quer atualizar
+            st.session_state["ccb_confirmacao_pendente"] = {
+                "ccb": ccb_input, "valor": valor, "parceiro": parceiro,
+                "status_bankerize": status_bankerize
+            }
+            st.rerun()
+
+        else:
+            with st.spinner("Processando..."):
+                resposta = assumir_ccb(ccb_input, valor, parceiro, analista, status_bankerize)
+                if resposta == "OK":
+                    st.success("CCB criada e assumida com sucesso")
+                    st.rerun()
+                elif resposta == "CONTINUAR":
+                    st.success("Retomando análise desta CCB")
+                else:
+                    st.error(resposta)
+
+    # Modal de confirmação de atualização
+    if "ccb_confirmacao_pendente" in st.session_state:
+        dados_pendentes = st.session_state["ccb_confirmacao_pendente"]
+        st.warning(f"A CCB **{dados_pendentes['ccb']}** já existe. Deseja atualizá-la com os novos dados?")
+        col_sim, col_nao = st.columns(2)
+        with col_sim:
+            if st.button("Sim, atualizar", use_container_width=True):
+                with st.spinner("Atualizando..."):
+                    resp = atualizar_ccb(
+                        dados_pendentes["ccb"], dados_pendentes["valor"],
+                        dados_pendentes["parceiro"], analista,
+                        dados_pendentes["status_bankerize"]
+                    )
+                    del st.session_state["ccb_confirmacao_pendente"]
+                    if resp == "ATUALIZADO":
+                        st.success("CCB atualizada com sucesso")
+                        st.rerun()
+                    else:
+                        st.error(resp)
+        with col_nao:
+            if st.button("Não, continuar sem atualizar", use_container_width=True):
+                ccb_retomar = dados_pendentes["ccb"]
+                del st.session_state["ccb_confirmacao_pendente"]
+                st.session_state["ccb_ativa"] = ccb_retomar
                 st.rerun()
-            elif resposta == "CONTINUAR":
-                st.success("Retomando análise desta CCB")
-            else:
-                st.error(resposta)
-    
+
     if "ccb_ativa" in st.session_state:
         st.divider()
         st.subheader(f"Finalizando CCB {st.session_state['ccb_ativa']}")
@@ -838,43 +949,46 @@ if menu == "Operação":
                         anotacoes,
                         status_bankerize
                     )
-                    
                     if resultado_final == "Finalizado":
                         st.success("Análise finalizada com sucesso")
                         del st.session_state["ccb_ativa"]
                         st.rerun()
                     else:
                         st.error(resultado_final)
-    
+
     # ==============================
-    # PAINEL GERAL
+    # PAINEL GERAL COM FILTROS
     # ==============================
-    
     st.divider()
     st.subheader("Painel Geral")
-    
+
     df = carregar_base().copy()
-    
+
     if not df.empty:
-        df["Data da Análise"] = pd.to_datetime(
-            df["Data da Análise"],
-            dayfirst=True,
-            errors="coerce"
-        )
-        
+        df["Data da Análise"] = pd.to_datetime(df["Data da Análise"], dayfirst=True, errors="coerce")
         df = df.dropna(subset=["Data da Análise"])
         df = df.sort_values(by="Data da Análise", ascending=False)
-        
-        # FORMATO BRASILEIRO
-        df["Data da Análise"] = df["Data da Análise"].dt.strftime("%d/%m/%Y %H:%M:%S")
-        
-        st.dataframe(df, use_container_width=True, hide_index=True)
+
+        # Filtros
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            analistas_disponiveis = ["Todos"] + sorted(df["Analista"].dropna().unique().tolist())
+            filtro_analista = st.selectbox("Filtrar por Analista", analistas_disponiveis, key="filtro_analista_painel")
+        with col_f2:
+            status_disponiveis = ["Todos"] + sorted(df["Status Analista"].dropna().unique().tolist())
+            filtro_status = st.selectbox("Filtrar por Status", status_disponiveis, key="filtro_status_painel")
+
+        df_filtrado = df.copy()
+        if filtro_analista != "Todos":
+            df_filtrado = df_filtrado[df_filtrado["Analista"] == filtro_analista]
+        if filtro_status != "Todos":
+            df_filtrado = df_filtrado[df_filtrado["Status Analista"] == filtro_status]
+
+        df_filtrado["Data da Análise"] = df_filtrado["Data da Análise"].dt.strftime("%d/%m/%Y %H:%M:%S")
+        st.caption(f"{len(df_filtrado)} registro(s) encontrado(s)")
+        st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
     else:
         st.info("Nenhum registro encontrado.")
-
-# ==============================
-# ACOMPANHAMENTO
-# ==============================
 
 # ==============================
 # ACOMPANHAMENTO (apenas Supervisor)
@@ -977,7 +1091,37 @@ if menu == "Acompanhamento":
             st.divider()
 
             # ==============================
-            # RELATÓRIO DETALHADO + EXPORTAR
+            # RANKING DE PRODUTIVIDADE
+            # ==============================
+            st.subheader("Ranking de Produtividade")
+
+            ranking = df[df["Status Analista"].isin(["Análise Aprovada", "Análise Reprovada"])]\
+                .groupby("Analista").size().reset_index(name="Finalizadas")\
+                .sort_values("Finalizadas", ascending=False).reset_index(drop=True)
+
+            if not ranking.empty:
+                medalhas = ["🥇", "🥈", "🥉"]
+                for i, row in ranking.iterrows():
+                    medalha = medalhas[i] if i < 3 else f"{i+1}."
+                    pct = int(row["Finalizadas"] / ranking["Finalizadas"].sum() * 100)
+                    st.markdown(f"""
+                    <div style="display:flex;align-items:center;gap:12px;
+                        padding:10px 16px;border-radius:10px;margin-bottom:6px;
+                        background:{'rgba(34,197,94,0.12)' if i == 0 else 'rgba(0,0,0,0.03)'};
+                        border:1px solid {'rgba(34,197,94,0.3)' if i == 0 else 'rgba(0,0,0,0.06)'};">
+                        <span style="font-size:1.4rem;">{medalha}</span>
+                        <span style="font-weight:700;flex:1;">{row['Analista']}</span>
+                        <span style="font-weight:600;color:#16a34a;">{int(row['Finalizadas'])} finalizadas</span>
+                        <span style="font-size:0.8rem;color:#64748b;">{pct}%</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("Nenhuma análise finalizada no período.")
+
+            st.divider()
+
+            # ==============================
+            # RELATÓRIO DETALHADO + EXPORTAR EXCEL
             # ==============================
             st.subheader("Relatório Detalhado")
 
@@ -990,12 +1134,55 @@ if menu == "Acompanhamento":
             with col_tab:
                 st.dataframe(df_export, use_container_width=True, hide_index=True)
             with col_btn:
-                csv = df_export.to_csv(index=False, sep=";", encoding="utf-8-sig")
+                # Exportar Excel formatado
+                import io
+                from openpyxl import Workbook
+                from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+                from openpyxl.utils import get_column_letter
+
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "Relatório"
+
+                # Cabeçalho verde
+                header_fill = PatternFill("solid", fgColor="16A34A")
+                header_font = Font(bold=True, color="FFFFFF", size=10)
+                thin = Side(style="thin", color="D1D5DB")
+                border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+                for col_idx, col_name in enumerate(df_export.columns, 1):
+                    cell = ws.cell(row=1, column=col_idx, value=col_name)
+                    cell.fill = header_fill
+                    cell.font = header_font
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    cell.border = border
+
+                # Dados
+                alt_fill = PatternFill("solid", fgColor="F1F5F9")
+                for row_idx, row in enumerate(df_export.itertuples(index=False), 2):
+                    for col_idx, value in enumerate(row, 1):
+                        cell = ws.cell(row=row_idx, column=col_idx, value=value)
+                        cell.border = border
+                        cell.alignment = Alignment(vertical="center")
+                        if row_idx % 2 == 0:
+                            cell.fill = alt_fill
+
+                # Ajusta largura das colunas
+                for col_idx, col_name in enumerate(df_export.columns, 1):
+                    max_len = max(len(str(col_name)), df_export[col_name].astype(str).str.len().max())
+                    ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len + 4, 40)
+
+                ws.row_dimensions[1].height = 20
+
+                buf = io.BytesIO()
+                wb.save(buf)
+                buf.seek(0)
+
                 st.download_button(
-                    label="Exportar CSV",
-                    data=csv,
-                    file_name=f"relatorio_{data_inicio.strftime('%d%m%Y')}_{data_fim.strftime('%d%m%Y')}.csv",
-                    mime="text/csv",
+                    label="Exportar Excel",
+                    data=buf,
+                    file_name=f"relatorio_{data_inicio.strftime('%d%m%Y')}_{data_fim.strftime('%d%m%Y')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
                 )
 
@@ -1070,3 +1257,31 @@ if menu == "Administração":
                     st.rerun()
                 else:
                     st.error("Erro ao excluir usuário.")
+
+    st.divider()
+
+    # TROCA DE SENHA (qualquer usuário pode trocar a própria senha)
+    st.subheader("Alterar Senha de Usuário")
+
+    usuario_senha = st.selectbox("Usuário", list(usuarios.keys()), key="sel_usuario_senha")
+    senha_nova    = st.text_input("Nova Senha", type="password", key="nova_senha_adm")
+    senha_nova2   = st.text_input("Confirmar Nova Senha", type="password", key="nova_senha_adm2")
+
+    if st.button("Alterar Senha", key="btn_alterar_senha_adm"):
+        if not senha_nova:
+            st.error("Informe a nova senha.")
+        elif senha_nova != senha_nova2:
+            st.error("As senhas não coincidem.")
+        else:
+            with st.spinner("Alterando senha..."):
+                novo_hash = hash_senha(senha_nova)
+                try:
+                    dados_u = sheet_usuarios.get_all_values()
+                    for idx_u, linha_u in enumerate(dados_u[1:], start=2):
+                        if linha_u[0] == usuario_senha:
+                            sheet_usuarios.update_cell(idx_u, 2, novo_hash)
+                            carregar_usuarios.clear()
+                            st.success(f"Senha de {usuario_senha} alterada com sucesso.")
+                            break
+                except Exception as e:
+                    st.error(f"Erro ao alterar senha: {e}")
