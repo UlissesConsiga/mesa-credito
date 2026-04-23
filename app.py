@@ -245,7 +245,7 @@ label {
 }
 
 /* ============================= */
-/* SIDEBAR - azul-escuro neutro, logo sempre visível */
+/* SIDEBAR - azul-escuro neutro */
 /* ============================= */
 [data-testid="stSidebar"] {
     background: #1a1f2e !important;
@@ -284,12 +284,25 @@ label {
     border-color: rgba(34,197,94,0.5) !important;
 }
 
-/* Logo na sidebar - fundo branco suave para contraste */
+/* Logo na sidebar */
 [data-testid="stSidebar"] img {
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     background: #ffffff !important;
-    padding: 8px !important;
+    padding: 6px !important;
     display: block !important;
+    margin: 0 auto !important;
+}
+
+/* Botão de colapsar/expandir sidebar — SEMPRE visível */
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    background: #1a1f2e !important;
+    color: #e2e8f0 !important;
+}
+
+[data-testid="collapsedControl"] svg {
+    fill: #e2e8f0 !important;
+    color: #e2e8f0 !important;
 }
 
 /* ============================= */
@@ -406,6 +419,10 @@ header[data-testid="stHeader"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
 #MainMenu { display: none !important; }
 footer { display: none !important; }
+
+/* Na tela de login: esconde sidebar E o botão de expandir */
+.login-page [data-testid="stSidebar"] { display: none !important; }
+.login-page [data-testid="collapsedControl"] { display: none !important; }
 
 /* Card de login */
 .login-card {
@@ -752,10 +769,8 @@ def excluir_usuario(usuario):
 def login():
     st.markdown("""
     <style>
-    /* Na tela de login: esconde sidebar e centraliza o card */
     [data-testid="stSidebar"],
     [data-testid="collapsedControl"] { display: none !important; }
-
     .main .block-container {
         max-width: 460px !important;
         padding: 10vh 1rem 4rem !important;
@@ -764,36 +779,27 @@ def login():
     </style>
     """, unsafe_allow_html=True)
 
-    # Card completo em HTML — sem nenhum st.image para evitar elemento flutuante
-    st.markdown("""
-    <div style="
-        background: var(--bg-primary);
-        border-radius: 20px;
-        padding: 2.5rem 2.5rem 2rem;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.18);
-        border: 1px solid var(--border-color);
-        text-align: center;
-        margin-bottom: 1.5rem;
-    ">
-        <img
-            src="Logo Principal.png"
-            onerror="this.style.display='none'; document.getElementById('logo-fb').style.display='inline-flex';"
-            style="max-width:200px; height:auto; border-radius:10px; margin-bottom:1.25rem; display:block; margin-left:auto; margin-right:auto;"
-        />
-        <div id="logo-fb" style="
-            display:none;
-            flex-direction:column;
-            align-items:center;
-            background:linear-gradient(135deg,#22c55e,#16a34a);
-            border-radius:14px;
-            padding:1rem 2rem;
-            margin:0 auto 1.25rem;
-            width:fit-content;
-            box-shadow:0 8px 24px rgba(34,197,94,0.3);
-        ">
+    # Logo: usa base64 para funcionar no Render sem depender de path relativo
+    import base64
+    logo_html = ""
+    try:
+        with open("Logo Principal.png", "rb") as f:
+            logo_b64 = base64.b64encode(f.read()).decode()
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="max-width:200px;height:auto;border-radius:10px;margin:0 auto 1.25rem;display:block;" />'
+    except Exception:
+        logo_html = """
+        <div style="display:inline-flex;flex-direction:column;align-items:center;
+            background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:14px;
+            padding:1rem 2rem;margin:0 auto 1.25rem;width:fit-content;
+            box-shadow:0 8px 24px rgba(34,197,94,0.3);">
             <span style="font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:0.06em;line-height:1;">CONSIGA</span>
             <span style="font-size:0.75rem;font-weight:600;color:#fbbf24;letter-spacing:0.12em;text-transform:uppercase;margin-top:4px;">Empréstimos</span>
-        </div>
+        </div>"""
+
+    st.markdown(f"""
+    <div style="background:var(--bg-primary);border-radius:20px;padding:2.5rem 2.5rem 2rem;
+        box-shadow:0 25px 50px rgba(0,0,0,0.18);border:1px solid var(--border-color);text-align:center;margin-bottom:1.5rem;">
+        {logo_html}
         <p style="font-size:1.375rem;font-weight:700;margin:0 0 4px;">Bem-vindo</p>
         <p style="font-size:0.875rem;font-weight:400;margin:0;opacity:0.7;">Sistema de Controle de Análise de Crédito</p>
     </div>
@@ -846,33 +852,31 @@ opcoes_menu = ["Operação", "Acompanhamento"]
 if st.session_state["perfil"] == "Supervisor":
     opcoes_menu.append("Administração")
 
-# Logo na sidebar em HTML puro (sem st.image para evitar elementos flutuantes)
-st.sidebar.markdown("""
-<div style="padding: 1.25rem 0.75rem 0.5rem; text-align: center;">
-    <img
-        src="Logo Principal.png"
-        onerror="this.style.display='none'; document.getElementById('sb-logo-fb').style.display='inline-flex';"
-        style="max-width:160px; width:100%; height:auto; border-radius:10px; background:#fff; padding:6px;"
-    />
-    <div id="sb-logo-fb" style="
-        display:none;
-        flex-direction:column;
-        align-items:center;
-        background:rgba(34,197,94,0.15);
-        border:1px solid rgba(34,197,94,0.3);
-        border-radius:12px;
-        padding:0.75rem 1.25rem;
-        margin:0 auto;
-        width:fit-content;
-    ">
-        <span style="font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:0.06em;">CONSIGA</span>
-        <span style="font-size:0.65rem;font-weight:600;color:#fb923c;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Empréstimos</span>
+# Logo na sidebar com base64 (funciona no Render)
+import base64 as _b64
+try:
+    with open("Logo Principal.png", "rb") as _f:
+        _logo_b64 = _b64.b64encode(_f.read()).decode()
+    st.sidebar.markdown(f"""
+    <div style="padding:1.25rem 0.5rem 0.5rem;text-align:center;">
+        <img src="data:image/png;base64,{_logo_b64}"
+             style="max-width:160px;width:100%;height:auto;border-radius:10px;background:#fff;padding:6px;display:block;margin:0 auto;" />
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+except Exception:
+    st.sidebar.markdown("""
+    <div style="padding:1.25rem 0.5rem 0.5rem;text-align:center;">
+        <div style="display:inline-flex;flex-direction:column;align-items:center;
+            background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);
+            border-radius:12px;padding:0.75rem 1.25rem;">
+            <span style="font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:0.06em;">CONSIGA</span>
+            <span style="font-size:0.65rem;font-weight:600;color:#fb923c;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Empréstimos</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-menu = st.sidebar.selectbox("", opcoes_menu)
+menu = st.sidebar.selectbox("Navegação", opcoes_menu, label_visibility="collapsed")
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"**Usuário:** {analista}")
 st.sidebar.markdown(f"**Perfil:** {st.session_state['perfil']}")
@@ -1007,7 +1011,9 @@ if menu == "Acompanhamento":
         df["Data da Análise"] = pd.to_datetime(df["Data da Análise"], dayfirst=True, errors="coerce")
         df = df.dropna(subset=["Data da Análise"])
         
-        st.divider()
+        # ==============================
+        # RESUMO DO MÊS ATUAL
+        # ==============================
         st.subheader("Resumo do Mês Atual")
         
         mes_atual = datetime.now().strftime("%m/%Y")
@@ -1016,57 +1022,131 @@ if menu == "Acompanhamento":
         
         if not df_mes_atual.empty:
             
-            pendentes = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Pendente"].shape[0]
-            aprovadas = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Aprovada"].shape[0]
+            pendentes  = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Pendente"].shape[0]
+            aprovadas  = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Aprovada"].shape[0]
             reprovadas = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Reprovada"].shape[0]
-            total = df_mes_atual.shape[0]
+            total      = df_mes_atual.shape[0]
             
-            # Métricas visuais
             col1, col2, col3, col4 = st.columns(4)
             col1.metric("Total", total)
             col2.metric("Pendentes", pendentes)
             col3.metric("Aprovadas", aprovadas)
             col4.metric("Reprovadas", reprovadas)
             
-            # Gráfico
-            resumo_mes = pd.DataFrame({
-                "Status": [
-                    "Propostas Pendentes",
-                    "Propostas Aprovadas",
-                    "Propostas Reprovadas"
-                ],
-                "Quantidade": [
-                    pendentes,
-                    aprovadas,
-                    reprovadas
-                ]
-            })
-            
-            fig, ax = plt.subplots(figsize=(10, 6))
-            barras = ax.bar(resumo_mes["Status"], resumo_mes["Quantidade"], color=['#FFA500', '#28a745', '#dc3545'])
-            
+            fig, ax = plt.subplots(figsize=(10, 5))
+            barras = ax.bar(
+                ["Pendentes", "Aprovadas", "Reprovadas"],
+                [pendentes, aprovadas, reprovadas],
+                color=["#f97316", "#22c55e", "#ef4444"],
+                width=0.5,
+                edgecolor="none"
+            )
             for barra in barras:
-                altura = barra.get_height()
-                ax.text(
-                    barra.get_x() + barra.get_width() / 2,
-                    altura,
-                    f'{int(altura)}',
-                    ha='center',
-                    va='bottom',
-                    fontsize=12,
-                    fontweight='bold'
-                )
-            
-            plt.xticks(rotation=45, ha='right')
-            plt.ylabel('Quantidade')
-            plt.title(f'Resumo de Propostas - {mes_atual}')
+                h = barra.get_height()
+                ax.text(barra.get_x() + barra.get_width()/2, h + 0.1,
+                        f'{int(h)}', ha='center', va='bottom', fontsize=13, fontweight='bold')
+            ax.set_ylabel("Quantidade", fontsize=11)
+            ax.set_title(f"Propostas — {mes_atual}", fontsize=13, fontweight='bold', pad=15)
+            ax.spines[['top','right']].set_visible(False)
+            ax.set_axisbelow(True)
+            ax.yaxis.grid(True, linestyle='--', alpha=0.5)
             plt.tight_layout()
             st.pyplot(fig)
+            plt.close(fig)
             
         else:
             st.info("Nenhuma proposta encontrada no mês atual.")
-        
+
         st.divider()
+
+        # ==============================
+        # RESUMO DA SEMANA ATUAL
+        # ==============================
+        st.subheader("Resumo da Semana Atual")
+
+        hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+        # Segunda-feira da semana atual
+        inicio_semana = hoje - pd.Timedelta(days=hoje.weekday())
+        # Domingo da semana atual
+        fim_semana    = inicio_semana + pd.Timedelta(days=6)
+
+        df["Data_date"] = df["Data da Análise"].dt.date
+        df_semana = df[(df["Data_date"] >= inicio_semana) & (df["Data_date"] <= fim_semana)]
+
+        st.caption(f"Período: {inicio_semana.strftime('%d/%m/%Y')} (Seg) até {fim_semana.strftime('%d/%m/%Y')} (Dom)")
+
+        if not df_semana.empty:
+            pend_s  = df_semana[df_semana["Status Analista"] == "Análise Pendente"].shape[0]
+            aprov_s = df_semana[df_semana["Status Analista"] == "Análise Aprovada"].shape[0]
+            reprov_s= df_semana[df_semana["Status Analista"] == "Análise Reprovada"].shape[0]
+            total_s = df_semana.shape[0]
+
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("Total", total_s)
+            col2.metric("Pendentes", pend_s)
+            col3.metric("Aprovadas", aprov_s)
+            col4.metric("Reprovadas", reprov_s)
+
+            # Gráfico por dia da semana
+            dias_pt = {0:"Seg", 1:"Ter", 2:"Qua", 3:"Qui", 4:"Sex", 5:"Sáb", 6:"Dom"}
+            df_semana = df_semana.copy()
+            df_semana["DiaSemana"] = df_semana["Data da Análise"].dt.weekday
+            df_semana["DiaLabel"]  = df_semana["DiaSemana"].map(dias_pt)
+
+            por_dia = df_semana.groupby(["DiaSemana","DiaLabel","Status Analista"]).size().reset_index(name="Qtd")
+
+            # Pivot para gráfico empilhado
+            pivot = por_dia.pivot_table(index=["DiaSemana","DiaLabel"], columns="Status Analista", values="Qtd", fill_value=0).reset_index()
+            pivot = pivot.sort_values("DiaSemana")
+
+            dias_labels = pivot["DiaLabel"].tolist()
+            x = range(len(dias_labels))
+            cores_status = {
+                "Análise Aprovada":  "#22c55e",
+                "Análise Reprovada": "#ef4444",
+                "Análise Pendente":  "#f97316",
+                "Em Análise":        "#3b82f6"
+            }
+
+            fig2, ax2 = plt.subplots(figsize=(10, 5))
+            bottom = [0] * len(dias_labels)
+            for status, cor in cores_status.items():
+                if status in pivot.columns:
+                    vals = pivot[status].tolist()
+                    bars = ax2.bar(x, vals, bottom=bottom, label=status, color=cor, width=0.5, edgecolor="none")
+                    bottom = [b + v for b, v in zip(bottom, vals)]
+
+            ax2.set_xticks(list(x))
+            ax2.set_xticklabels(dias_labels, fontsize=11)
+            ax2.set_ylabel("Quantidade", fontsize=11)
+            ax2.set_title(f"Propostas por Dia — Semana {inicio_semana.strftime('%d/%m')} a {fim_semana.strftime('%d/%m')}", fontsize=13, fontweight='bold', pad=15)
+            ax2.spines[['top','right']].set_visible(False)
+            ax2.set_axisbelow(True)
+            ax2.yaxis.grid(True, linestyle='--', alpha=0.5)
+            ax2.legend(loc='upper right', fontsize=9, framealpha=0.7)
+            plt.tight_layout()
+            st.pyplot(fig2)
+            plt.close(fig2)
+
+            # Tabela por analista na semana
+            st.markdown("**Por Analista — Semana Atual**")
+            resumo_sem = df_semana.groupby("Analista").agg(
+                Total=("Status Analista", "count"),
+                Em_Analise=("Status Analista", lambda x: (x == "Em Análise").sum()),
+                Pendentes=("Status Analista", lambda x: (x == "Análise Pendente").sum()),
+                Aprovadas=("Status Analista", lambda x: (x == "Análise Aprovada").sum()),
+                Reprovadas=("Status Analista", lambda x: (x == "Análise Reprovada").sum())
+            ).reset_index().sort_values("Total", ascending=False)
+            st.dataframe(resumo_sem, use_container_width=True, hide_index=True)
+
+        else:
+            st.info("Nenhuma proposta encontrada nesta semana.")
+
+        st.divider()
+
+        # ==============================
+        # DASHBOARD POR ANALISTA
+        # ==============================
         st.subheader("Dashboard por Analista")
         
         meses = sorted(df["MesAno"].dropna().unique(), reverse=True)
@@ -1085,6 +1165,9 @@ if menu == "Acompanhamento":
             
             resumo = resumo.sort_values(by="Total", ascending=False)
             st.dataframe(resumo, use_container_width=True, hide_index=True)
+
+    else:
+        st.info("Nenhum registro encontrado.")
 
 # ==============================
 # ADMINISTRAÇÃO
