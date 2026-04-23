@@ -813,24 +813,34 @@ if st.sidebar.button("Sair", use_container_width=True, type="primary"):
         del st.session_state[key]
     st.rerun()
 
-# Troca de senha própria (disponível para todos os perfis via expander na sidebar)
-with st.sidebar.expander("Alterar minha senha"):
-    s_atual  = st.text_input("Senha atual",    type="password", key="s_atual")
-    s_nova   = st.text_input("Nova senha",     type="password", key="s_nova")
-    s_nova2  = st.text_input("Confirmar nova", type="password", key="s_nova2")
-    if st.button("Salvar senha", key="btn_salvar_senha", use_container_width=True):
+# Troca de senha própria — sem expander (evita bug visual na sidebar)
+if "mostrar_troca_senha" not in st.session_state:
+    st.session_state["mostrar_troca_senha"] = False
+
+label_btn_senha = "Ocultar" if st.session_state["mostrar_troca_senha"] else "Alterar minha senha"
+if st.sidebar.button(label_btn_senha, use_container_width=True, key="btn_toggle_senha"):
+    st.session_state["mostrar_troca_senha"] = not st.session_state["mostrar_troca_senha"]
+    st.rerun()
+
+if st.session_state["mostrar_troca_senha"]:
+    s_atual = st.sidebar.text_input("Senha atual",    type="password", key="s_atual")
+    s_nova  = st.sidebar.text_input("Nova senha",     type="password", key="s_nova")
+    s_nova2 = st.sidebar.text_input("Confirmar nova", type="password", key="s_nova2")
+    if st.sidebar.button("Salvar senha", key="btn_salvar_senha", use_container_width=True):
         if not s_atual or not s_nova:
-            st.error("Preencha todos os campos.")
+            st.sidebar.error("Preencha todos os campos.")
         elif s_nova != s_nova2:
-            st.error("As senhas não coincidem.")
+            st.sidebar.error("As senhas não coincidem.")
         elif len(s_nova) < 4:
-            st.error("A senha deve ter ao menos 4 caracteres.")
+            st.sidebar.error("Mínimo 4 caracteres.")
         else:
             ok, msg = alterar_senha(analista, s_atual, s_nova)
             if ok:
-                st.success(msg)
+                st.sidebar.success(msg)
+                st.session_state["mostrar_troca_senha"] = False
+                st.rerun()
             else:
-                st.error(msg)
+                st.sidebar.error(msg)
 
 # ==============================
 # OPERAÇÃO
@@ -922,10 +932,12 @@ if menu == "Operação":
                     else:
                         st.error(resp)
         with col_nao:
-            if st.button("Não, continuar sem atualizar", use_container_width=True):
-                ccb_retomar = dados_pendentes["ccb"]
+            if st.button("Não, informar outra CCB", use_container_width=True):
                 del st.session_state["ccb_confirmacao_pendente"]
-                st.session_state["ccb_ativa"] = ccb_retomar
+                # Limpa qualquer CCB ativa para não mostrar tela de finalização
+                if "ccb_ativa" in st.session_state:
+                    del st.session_state["ccb_ativa"]
+                st.info("Informe o número de outra CCB para continuar.")
                 st.rerun()
 
     if "ccb_ativa" in st.session_state:
