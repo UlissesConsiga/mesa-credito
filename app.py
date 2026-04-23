@@ -281,17 +281,20 @@ label { font-weight: 600 !important; font-size: 0.8125rem !important; text-trans
     }
 }
 
-/* Esconde completamente o botão de colapsar/expandir */
-[data-testid="collapsedControl"] {
+/* Esconde o botão de colapsar — todos os seletores possíveis */
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+button[data-testid="baseButton-header"],
+section[data-testid="stSidebar"] > div > button {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
     width: 0 !important;
+    min-width: 0 !important;
+    height: 0 !important;
     overflow: hidden !important;
-}
-[data-testid="stSidebar"] button[kind="header"],
-[data-testid="stSidebar"] [data-testid="baseButton-header"] {
-    display: none !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 /* ============================= */
@@ -321,6 +324,44 @@ hr { border: none !important; height: 1px !important; background: linear-gradien
 """, unsafe_allow_html=True)
 
 # Header removido - design profissional aplicado
+
+# JavaScript para fixar a sidebar permanentemente (impede colapso)
+st.markdown("""
+<script>
+(function fixSidebar() {
+    function forceExpand() {
+        // Remove o atributo aria-expanded=false que colapsa a sidebar
+        var sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            sidebar.removeAttribute('aria-hidden');
+            sidebar.style.display = '';
+            sidebar.style.visibility = 'visible';
+            sidebar.style.width = '';
+            sidebar.style.minWidth = '';
+        }
+
+        // Esconde e desabilita o botão de colapsar
+        var btns = window.parent.document.querySelectorAll(
+            '[data-testid="collapsedControl"], [data-testid="stSidebarCollapseButton"]'
+        );
+        btns.forEach(function(btn) {
+            btn.style.display = 'none';
+            btn.style.pointerEvents = 'none';
+            // Bloqueia cliques
+            btn.addEventListener('click', function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }, true);
+        });
+    }
+
+    // Executa imediatamente e observa mudanças no DOM
+    forceExpand();
+    var observer = new MutationObserver(forceExpand);
+    observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
+})();
+</script>
+""", unsafe_allow_html=True)
 
 # ==============================
 # FUNÇÕES DE UTILIDADE
@@ -649,11 +690,24 @@ if "user" not in st.session_state:
     login()
     st.stop()
 
-# Após login: restaura layout normal e garante sidebar visível
+# Após login: restaura layout normal — sidebar sempre visível, botão de colapsar NUNCA aparece
 st.markdown("""
 <style>
-[data-testid="stSidebar"],
-[data-testid="collapsedControl"] { display: flex !important; }
+[data-testid="stSidebar"] { display: flex !important; }
+
+/* Garante que o botão de colapsar nunca apareça em nenhuma situação */
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+button[data-testid="baseButton-header"],
+section[data-testid="stSidebar"] > div > button {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
 
 .main .block-container {
     max-width: 100% !important;
