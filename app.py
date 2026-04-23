@@ -245,7 +245,24 @@ label {
 }
 
 /* ============================= */
-/* SIDEBAR - azul-escuro neutro */
+/* CURSOR PADRÃO EM TODO O SITE */
+/* ============================= */
+*, *:hover {
+    cursor: default !important;
+}
+a, button, [role="button"], .stButton>button,
+input, textarea, select,
+[data-testid="stSelectbox"],
+[data-baseweb="select"],
+label[for] {
+    cursor: pointer !important;
+}
+input[type="text"], input[type="password"], textarea {
+    cursor: text !important;
+}
+
+/* ============================= */
+/* SIDEBAR - fundo escuro sem branco na logo */
 /* ============================= */
 [data-testid="stSidebar"] {
     background: #1a1f2e !important;
@@ -284,20 +301,27 @@ label {
     border-color: rgba(34,197,94,0.5) !important;
 }
 
-/* Logo na sidebar */
+/* Logo na sidebar — sem fundo branco, transparente */
 [data-testid="stSidebar"] img {
-    border-radius: 10px !important;
-    background: #ffffff !important;
-    padding: 6px !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    padding: 0 !important;
     display: block !important;
     margin: 0 auto !important;
 }
 
-/* Botão de colapsar/expandir sidebar — SEMPRE visível */
+/* Botão de colapsar/expandir sidebar — SEMPRE visível e estilizado */
 [data-testid="collapsedControl"] {
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     background: #1a1f2e !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+[data-testid="collapsedControl"] button {
     color: #e2e8f0 !important;
+    background: transparent !important;
 }
 
 [data-testid="collapsedControl"] svg {
@@ -797,11 +821,11 @@ def login():
         </div>"""
 
     st.markdown(f"""
-    <div style="background:var(--bg-primary);border-radius:20px;padding:2.5rem 2.5rem 2rem;
-        box-shadow:0 25px 50px rgba(0,0,0,0.18);border:1px solid var(--border-color);text-align:center;margin-bottom:1.5rem;">
+    <div style="background:var(--bg-primary);border-radius:16px;padding:2rem 2rem 1.5rem;
+        box-shadow:0 8px 32px rgba(0,0,0,0.12);border:1px solid var(--border-color);text-align:center;margin-bottom:1.25rem;">
         {logo_html}
-        <p style="font-size:1.375rem;font-weight:700;margin:0 0 4px;">Bem-vindo</p>
-        <p style="font-size:0.875rem;font-weight:400;margin:0;opacity:0.7;">Sistema de Controle de Análise de Crédito</p>
+        <p style="font-size:1.25rem;font-weight:700;margin:0 0 3px;">Bem-vindo</p>
+        <p style="font-size:0.8125rem;font-weight:400;margin:0;opacity:0.6;">Sistema de Controle de Análise de Crédito</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -847,9 +871,10 @@ analista = st.session_state["user"]
 # MENU LATERAL
 # ==============================
 
-opcoes_menu = ["Operação", "Acompanhamento"]
+opcoes_menu = ["Operação"]
 
 if st.session_state["perfil"] == "Supervisor":
+    opcoes_menu.append("Acompanhamento")
     opcoes_menu.append("Administração")
 
 # Logo na sidebar com base64 (funciona no Render)
@@ -858,19 +883,19 @@ try:
     with open("Logo Principal.png", "rb") as _f:
         _logo_b64 = _b64.b64encode(_f.read()).decode()
     st.sidebar.markdown(f"""
-    <div style="padding:1.25rem 0.5rem 0.5rem;text-align:center;">
+    <div style="padding:1.25rem 1rem 0.75rem;text-align:center;">
         <img src="data:image/png;base64,{_logo_b64}"
-             style="max-width:160px;width:100%;height:auto;border-radius:10px;background:#fff;padding:6px;display:block;margin:0 auto;" />
+             style="max-width:150px;width:100%;height:auto;border-radius:6px;display:block;margin:0 auto;" />
     </div>
     """, unsafe_allow_html=True)
 except Exception:
     st.sidebar.markdown("""
-    <div style="padding:1.25rem 0.5rem 0.5rem;text-align:center;">
+    <div style="padding:1.25rem 1rem 0.75rem;text-align:center;">
         <div style="display:inline-flex;flex-direction:column;align-items:center;
             background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);
-            border-radius:12px;padding:0.75rem 1.25rem;">
-            <span style="font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:0.06em;">CONSIGA</span>
-            <span style="font-size:0.65rem;font-weight:600;color:#fb923c;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Empréstimos</span>
+            border-radius:10px;padding:0.6rem 1.2rem;">
+            <span style="font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:0.06em;">CONSIGA</span>
+            <span style="font-size:0.6rem;font-weight:600;color:#fb923c;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Empréstimos</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1000,174 +1025,128 @@ if menu == "Operação":
 # ACOMPANHAMENTO
 # ==============================
 
+# ==============================
+# ACOMPANHAMENTO (apenas Supervisor)
+# ==============================
+
 if menu == "Acompanhamento":
-    
+
+    if st.session_state["perfil"] != "Supervisor":
+        st.warning("Acesso restrito a Supervisores.")
+        st.stop()
+
     st.title("Acompanhamento")
-    
-    df = carregar_base().copy()
-    
-    if not df.empty:
-        
-        df["Data da Análise"] = pd.to_datetime(df["Data da Análise"], dayfirst=True, errors="coerce")
-        df = df.dropna(subset=["Data da Análise"])
-        
+
+    df_raw = carregar_base().copy()
+
+    if df_raw.empty:
+        st.info("Nenhum registro encontrado.")
+    else:
+        df_raw["Data da Análise"] = pd.to_datetime(df_raw["Data da Análise"], dayfirst=True, errors="coerce")
+        df_raw = df_raw.dropna(subset=["Data da Análise"])
+
         # ==============================
-        # RESUMO DO MÊS ATUAL
+        # FILTRO LIVRE POR DATA
         # ==============================
-        st.subheader("Resumo do Mês Atual")
-        
-        mes_atual = datetime.now().strftime("%m/%Y")
-        df["MesAno"] = df["Data da Análise"].dt.strftime("%m/%Y")
-        df_mes_atual = df[df["MesAno"] == mes_atual]
-        
-        if not df_mes_atual.empty:
-            
-            pendentes  = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Pendente"].shape[0]
-            aprovadas  = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Aprovada"].shape[0]
-            reprovadas = df_mes_atual[df_mes_atual["Status Analista"] == "Análise Reprovada"].shape[0]
-            total      = df_mes_atual.shape[0]
-            
-            col1, col2, col3, col4 = st.columns(4)
+        hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+        inicio_mes = hoje.replace(day=1)
+
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            data_inicio = st.date_input("Data de início", value=inicio_mes, format="DD/MM/YYYY")
+        with col_f2:
+            data_fim = st.date_input("Data de fim", value=hoje, format="DD/MM/YYYY")
+
+        df_raw["Data_date"] = df_raw["Data da Análise"].dt.date
+        df = df_raw[(df_raw["Data_date"] >= data_inicio) & (df_raw["Data_date"] <= data_fim)].copy()
+
+        st.caption(f"Exibindo registros de {data_inicio.strftime('%d/%m/%Y')} até {data_fim.strftime('%d/%m/%Y')} — {len(df)} registro(s)")
+
+        if df.empty:
+            st.info("Nenhuma proposta encontrada no período selecionado.")
+        else:
+            # ==============================
+            # MÉTRICAS DO PERÍODO
+            # ==============================
+            pendentes  = df[df["Status Analista"] == "Análise Pendente"].shape[0]
+            aprovadas  = df[df["Status Analista"] == "Análise Aprovada"].shape[0]
+            reprovadas = df[df["Status Analista"] == "Análise Reprovada"].shape[0]
+            em_analise = df[df["Status Analista"] == "Em Análise"].shape[0]
+            total      = len(df)
+
+            col1, col2, col3, col4, col5 = st.columns(5)
             col1.metric("Total", total)
-            col2.metric("Pendentes", pendentes)
-            col3.metric("Aprovadas", aprovadas)
-            col4.metric("Reprovadas", reprovadas)
-            
-            fig, ax = plt.subplots(figsize=(10, 5))
-            barras = ax.bar(
-                ["Pendentes", "Aprovadas", "Reprovadas"],
-                [pendentes, aprovadas, reprovadas],
-                color=["#f97316", "#22c55e", "#ef4444"],
-                width=0.5,
-                edgecolor="none"
-            )
-            for barra in barras:
-                h = barra.get_height()
-                ax.text(barra.get_x() + barra.get_width()/2, h + 0.1,
-                        f'{int(h)}', ha='center', va='bottom', fontsize=13, fontweight='bold')
-            ax.set_ylabel("Quantidade", fontsize=11)
-            ax.set_title(f"Propostas — {mes_atual}", fontsize=13, fontweight='bold', pad=15)
+            col2.metric("Em Análise", em_analise)
+            col3.metric("Pendentes", pendentes)
+            col4.metric("Aprovadas", aprovadas)
+            col5.metric("Reprovadas", reprovadas)
+
+            st.divider()
+
+            # ==============================
+            # GRÁFICO DO PERÍODO
+            # ==============================
+            fig, ax = plt.subplots(figsize=(9, 4))
+            labels = ["Em Análise", "Pendentes", "Aprovadas", "Reprovadas"]
+            valores = [em_analise, pendentes, aprovadas, reprovadas]
+            cores   = ["#3b82f6", "#f97316", "#22c55e", "#ef4444"]
+            barras  = ax.bar(labels, valores, color=cores, width=0.45, edgecolor="none")
+            for b in barras:
+                h = b.get_height()
+                if h > 0:
+                    ax.text(b.get_x() + b.get_width()/2, h + 0.05,
+                            str(int(h)), ha='center', va='bottom', fontsize=12, fontweight='bold')
+            ax.set_ylabel("Quantidade", fontsize=10)
+            ax.set_title(f"Propostas — {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}",
+                         fontsize=12, fontweight='bold', pad=12)
             ax.spines[['top','right']].set_visible(False)
             ax.set_axisbelow(True)
-            ax.yaxis.grid(True, linestyle='--', alpha=0.5)
+            ax.yaxis.grid(True, linestyle='--', alpha=0.4)
             plt.tight_layout()
             st.pyplot(fig)
             plt.close(fig)
-            
-        else:
-            st.info("Nenhuma proposta encontrada no mês atual.")
 
-        st.divider()
+            st.divider()
 
-        # ==============================
-        # RESUMO DA SEMANA ATUAL
-        # ==============================
-        st.subheader("Resumo da Semana Atual")
+            # ==============================
+            # DASHBOARD POR ANALISTA
+            # ==============================
+            st.subheader("Por Analista")
 
-        hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
-        # Segunda-feira da semana atual
-        inicio_semana = hoje - pd.Timedelta(days=hoje.weekday())
-        # Domingo da semana atual
-        fim_semana    = inicio_semana + pd.Timedelta(days=6)
-
-        df["Data_date"] = df["Data da Análise"].dt.date
-        df_semana = df[(df["Data_date"] >= inicio_semana) & (df["Data_date"] <= fim_semana)]
-
-        st.caption(f"Período: {inicio_semana.strftime('%d/%m/%Y')} (Seg) até {fim_semana.strftime('%d/%m/%Y')} (Dom)")
-
-        if not df_semana.empty:
-            pend_s  = df_semana[df_semana["Status Analista"] == "Análise Pendente"].shape[0]
-            aprov_s = df_semana[df_semana["Status Analista"] == "Análise Aprovada"].shape[0]
-            reprov_s= df_semana[df_semana["Status Analista"] == "Análise Reprovada"].shape[0]
-            total_s = df_semana.shape[0]
-
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Total", total_s)
-            col2.metric("Pendentes", pend_s)
-            col3.metric("Aprovadas", aprov_s)
-            col4.metric("Reprovadas", reprov_s)
-
-            # Gráfico por dia da semana
-            dias_pt = {0:"Seg", 1:"Ter", 2:"Qua", 3:"Qui", 4:"Sex", 5:"Sáb", 6:"Dom"}
-            df_semana = df_semana.copy()
-            df_semana["DiaSemana"] = df_semana["Data da Análise"].dt.weekday
-            df_semana["DiaLabel"]  = df_semana["DiaSemana"].map(dias_pt)
-
-            por_dia = df_semana.groupby(["DiaSemana","DiaLabel","Status Analista"]).size().reset_index(name="Qtd")
-
-            # Pivot para gráfico empilhado
-            pivot = por_dia.pivot_table(index=["DiaSemana","DiaLabel"], columns="Status Analista", values="Qtd", fill_value=0).reset_index()
-            pivot = pivot.sort_values("DiaSemana")
-
-            dias_labels = pivot["DiaLabel"].tolist()
-            x = range(len(dias_labels))
-            cores_status = {
-                "Análise Aprovada":  "#22c55e",
-                "Análise Reprovada": "#ef4444",
-                "Análise Pendente":  "#f97316",
-                "Em Análise":        "#3b82f6"
-            }
-
-            fig2, ax2 = plt.subplots(figsize=(10, 5))
-            bottom = [0] * len(dias_labels)
-            for status, cor in cores_status.items():
-                if status in pivot.columns:
-                    vals = pivot[status].tolist()
-                    bars = ax2.bar(x, vals, bottom=bottom, label=status, color=cor, width=0.5, edgecolor="none")
-                    bottom = [b + v for b, v in zip(bottom, vals)]
-
-            ax2.set_xticks(list(x))
-            ax2.set_xticklabels(dias_labels, fontsize=11)
-            ax2.set_ylabel("Quantidade", fontsize=11)
-            ax2.set_title(f"Propostas por Dia — Semana {inicio_semana.strftime('%d/%m')} a {fim_semana.strftime('%d/%m')}", fontsize=13, fontweight='bold', pad=15)
-            ax2.spines[['top','right']].set_visible(False)
-            ax2.set_axisbelow(True)
-            ax2.yaxis.grid(True, linestyle='--', alpha=0.5)
-            ax2.legend(loc='upper right', fontsize=9, framealpha=0.7)
-            plt.tight_layout()
-            st.pyplot(fig2)
-            plt.close(fig2)
-
-            # Tabela por analista na semana
-            st.markdown("**Por Analista — Semana Atual**")
-            resumo_sem = df_semana.groupby("Analista").agg(
+            resumo = df.groupby("Analista").agg(
                 Total=("Status Analista", "count"),
                 Em_Analise=("Status Analista", lambda x: (x == "Em Análise").sum()),
                 Pendentes=("Status Analista", lambda x: (x == "Análise Pendente").sum()),
                 Aprovadas=("Status Analista", lambda x: (x == "Análise Aprovada").sum()),
                 Reprovadas=("Status Analista", lambda x: (x == "Análise Reprovada").sum())
             ).reset_index().sort_values("Total", ascending=False)
-            st.dataframe(resumo_sem, use_container_width=True, hide_index=True)
 
-        else:
-            st.info("Nenhuma proposta encontrada nesta semana.")
-
-        st.divider()
-
-        # ==============================
-        # DASHBOARD POR ANALISTA
-        # ==============================
-        st.subheader("Dashboard por Analista")
-        
-        meses = sorted(df["MesAno"].dropna().unique(), reverse=True)
-        
-        if len(meses) > 0:
-            mes_sel = st.selectbox("Selecionar Mês/Ano", meses)
-            df_mes = df[df["MesAno"] == mes_sel]
-            
-            resumo = df_mes.groupby("Analista").agg(
-                Total=("Status Analista", "count"),
-                Em_Analise=("Status Analista", lambda x: (x == "Em Análise").sum()),
-                Pendentes=("Status Analista", lambda x: (x == "Análise Pendente").sum()),
-                Aprovadas=("Status Analista", lambda x: (x == "Análise Aprovada").sum()),
-                Reprovadas=("Status Analista", lambda x: (x == "Análise Reprovada").sum())
-            ).reset_index()
-            
-            resumo = resumo.sort_values(by="Total", ascending=False)
             st.dataframe(resumo, use_container_width=True, hide_index=True)
 
-    else:
-        st.info("Nenhum registro encontrado.")
+            st.divider()
+
+            # ==============================
+            # RELATÓRIO DETALHADO + EXPORTAR
+            # ==============================
+            st.subheader("Relatório Detalhado")
+
+            df_export = df.copy()
+            df_export["Data da Análise"] = df_export["Data da Análise"].dt.strftime("%d/%m/%Y %H:%M:%S")
+            df_export = df_export.drop(columns=["Data_date"], errors="ignore")
+            df_export = df_export.sort_values("Data da Análise", ascending=False)
+
+            col_tab, col_btn = st.columns([5, 1])
+            with col_tab:
+                st.dataframe(df_export, use_container_width=True, hide_index=True)
+            with col_btn:
+                csv = df_export.to_csv(index=False, sep=";", encoding="utf-8-sig")
+                st.download_button(
+                    label="Exportar CSV",
+                    data=csv,
+                    file_name=f"relatorio_{data_inicio.strftime('%d%m%Y')}_{data_fim.strftime('%d%m%Y')}.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
 
 # ==============================
 # ADMINISTRAÇÃO
