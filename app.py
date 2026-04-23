@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     layout="wide",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="expanded",
     page_title="Consiga Empréstimos",
     page_icon="💼"
 )
@@ -200,30 +200,12 @@ label { font-weight: 600 !important; font-size: 0.8125rem !important; text-trans
 }
 
 /* ============================= */
-/* SIDEBAR */
+/* SIDEBAR — fixa, sem botão de colapsar */
 /* ============================= */
 [data-testid="stSidebar"] {
-    background: #1a1f2e !important;
-    border-right: 1px solid rgba(255,255,255,0.05) !important;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.25) !important;
-}
-[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-[data-testid="stSidebar"] label { color: #64748b !important; font-size: 0.7rem !important; letter-spacing: 0.08em !important; }
-[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 8px !important;
-}
-[data-testid="stSidebar"] .stButton>button {
-    background: rgba(34,197,94,0.12) !important;
-    border: 1px solid rgba(34,197,94,0.25) !important;
-    color: #22c55e !important;
-    box-shadow: none !important;
-}
-[data-testid="stSidebar"] .stButton>button:hover {
-    background: rgba(34,197,94,0.22) !important;
-    border-color: rgba(34,197,94,0.45) !important;
-    transform: none !important;
+    border-right: 1px solid rgba(0,0,0,0.06) !important;
+    box-shadow: 4px 0 16px rgba(0,0,0,0.08) !important;
+    min-width: 240px !important;
 }
 [data-testid="stSidebar"] img {
     border-radius: 6px !important;
@@ -233,40 +215,84 @@ label { font-weight: 600 !important; font-size: 0.8125rem !important; text-trans
     margin: 0 auto !important;
 }
 
-/* ============================= */
-/* BOTÃO COLAPSAR/EXPANDIR SIDEBAR                          */
-/* font-size:0 no button esconde o texto "keyboard_double_" */
-/* ============================= */
+/* Sidebar — MODO CLARO: verde bem clarinho */
+@media (prefers-color-scheme: light) {
+    [data-testid="stSidebar"] {
+        background: #f0fdf4 !important;
+        border-right: 1px solid #bbf7d0 !important;
+    }
+    [data-testid="stSidebar"] * { color: #14532d !important; }
+    [data-testid="stSidebar"] label {
+        color: #166534 !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.08em !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        background: #ffffff !important;
+        border: 1px solid #86efac !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] * {
+        color: #14532d !important;
+    }
+    [data-testid="stSidebar"] .stButton>button {
+        background: #16a34a !important;
+        border: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(22,163,74,0.25) !important;
+    }
+    [data-testid="stSidebar"] .stButton>button:hover {
+        background: #15803d !important;
+        transform: none !important;
+    }
+    [data-testid="stSidebar"] hr {
+        background: #bbf7d0 !important;
+    }
+}
+
+/* Sidebar — MODO ESCURO: azul-escuro */
+@media (prefers-color-scheme: dark) {
+    [data-testid="stSidebar"] {
+        background: #1a1f2e !important;
+        border-right: 1px solid rgba(255,255,255,0.05) !important;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.25) !important;
+    }
+    [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
+    [data-testid="stSidebar"] label {
+        color: #64748b !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.08em !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stSidebar"] .stButton>button {
+        background: rgba(34,197,94,0.12) !important;
+        border: 1px solid rgba(34,197,94,0.25) !important;
+        color: #22c55e !important;
+        box-shadow: none !important;
+    }
+    [data-testid="stSidebar"] .stButton>button:hover {
+        background: rgba(34,197,94,0.22) !important;
+        border-color: rgba(34,197,94,0.45) !important;
+        transform: none !important;
+    }
+}
+
+/* Esconde completamente o botão de colapsar/expandir */
 [data-testid="collapsedControl"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    background: #1a1f2e !important;
-    border-right: 1px solid rgba(255,255,255,0.05) !important;
-    z-index: 999 !important;
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    overflow: hidden !important;
 }
-[data-testid="collapsedControl"] button {
-    background: transparent !important;
-    border: none !important;
-    font-size: 0 !important;
-    color: transparent !important;
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 6px !important;
-    transition: background 0.15s !important;
+[data-testid="stSidebar"] button[kind="header"],
+[data-testid="stSidebar"] [data-testid="baseButton-header"] {
+    display: none !important;
 }
-[data-testid="collapsedControl"] button:hover { background: rgba(255,255,255,0.08) !important; }
-[data-testid="collapsedControl"] button svg {
-    fill: #94a3b8 !important;
-    width: 1.25rem !important;
-    height: 1.25rem !important;
-    display: block !important;
-    font-size: 1.25rem !important;
-}
-[data-testid="collapsedControl"] button:hover svg { fill: #e2e8f0 !important; }
 
 /* ============================= */
 /* MÉTRICAS, DATAFRAMES, MISC */
